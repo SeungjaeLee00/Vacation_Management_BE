@@ -1,9 +1,12 @@
 package com.example.vacation_reservation.service;
 
 import com.example.vacation_reservation.dto.UserRequestDto;
+import com.example.vacation_reservation.dto.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Autowired
-    private final PasswordEncoder passwordEncoder;  // PasswordEncoder를 주입받습니다.\
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     private EmailService emailService;
@@ -22,10 +25,10 @@ public class UserService {
     @Autowired
     private EmailVerificationService emailVerificationService;
 
-    // 생성자 주입
+    // 생성자 넣기
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;  // BCryptPasswordEncoder가 주입됩니다.
+        this.passwordEncoder = passwordEncoder;
     }
 
     public String sendVerificationCode(String email) {
@@ -75,5 +78,18 @@ public class UserService {
         userRepository.save(user);
 
         return "회원가입이 완료되었습니다!";
+    }
+
+    // 현재 로그인된 사용자 정보 반환
+    public UserResponseDto getCurrentUser() {
+        // SecurityContextHolder에서 인증된 사용자 정보 가져오기
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        // 사용자 정보 가져오기 (userDetails.getUsername() == employeeId)
+        User user = userRepository.findByEmployeeId(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 필요한 정보만 담아서 DTO 반환
+        return new UserResponseDto(user.getEmployeeId(), user.getEmail(), user.getName());
     }
 }

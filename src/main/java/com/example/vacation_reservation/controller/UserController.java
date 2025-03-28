@@ -1,3 +1,5 @@
+// 회원가입(사용자 등록), 이메일 인증관련
+
 package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.ApiResponse;
@@ -16,17 +18,20 @@ public class UserController {
         this.userService = userService;
     }
 
+    // 회원가입
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRequestDto userRequestDto) {
         String message = userService.registerUser(userRequestDto);
         return ResponseEntity.ok(message);
     }
 
+    // 인증번호 전송
     @PostMapping("/send-verification-code")
     public String sendVerificationCode(@RequestParam String email) {
         return userService.sendVerificationCode(email);
     }
 
+    // 인증번호 확인
     @PostMapping("/verify-code")
     public ResponseEntity<?> verifyCode(@RequestParam String email, @RequestParam String code) {
         boolean isVerified = userService.verifyCode(email, code);
@@ -36,4 +41,5 @@ public class UserController {
             return ResponseEntity.badRequest().body(new ApiResponse(false, "인증번호가 올바르지 않습니다."));
         }
     }
+
 }

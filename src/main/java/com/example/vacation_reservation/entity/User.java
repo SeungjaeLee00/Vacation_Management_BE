@@ -1,9 +1,6 @@
 package com.example.vacation_reservation.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 public class User {
@@ -16,11 +13,15 @@ public class User {
     private String name;
     private String email;
     private String password;
-
     private boolean emailVerified; // 이메일 인증 여부
 
-    public User() {}
+    // Constructor, Getter, Setter 생략
 
+    // 기본 생성자 추가 (반드시 필요)
+    public User() {
+    }
+
+    // Constructor
     public User(String employeeId, String name, String email, String password, boolean emailVerified) {
         this.employeeId = employeeId;
         this.name = name;
