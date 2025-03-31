@@ -4,6 +4,7 @@ import com.example.vacation_reservation.dto.UserRequestDto;
 import com.example.vacation_reservation.dto.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.repository.UserRepository;
+import com.example.vacation_reservation.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,15 +21,19 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @Autowired
     private EmailService emailService;
 
     @Autowired
     private EmailVerificationService emailVerificationService;
 
     // 생성자 넣기
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtTokenProvider jwtTokenProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     public String sendVerificationCode(String email) {
@@ -81,15 +86,16 @@ public class UserService {
     }
 
     // 현재 로그인된 사용자 정보 반환
-    public UserResponseDto getCurrentUser() {
-        // SecurityContextHolder에서 인증된 사용자 정보 가져오기
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public UserResponseDto getCurrentUser(String token) {
+        // 토큰에서 employeeId 추출
+        String employeeId = JwtTokenProvider.getEmployeeIdFromToken(token);
 
-        // 사용자 정보 가져오기 (userDetails.getUsername() == employeeId)
-        User user = userRepository.findByEmployeeId(userDetails.getUsername())
+        // 사용자 정보 가져오기 (employeeId로 사용자 조회)
+        User user = userRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // 필요한 정보만 담아서 DTO 반환
         return new UserResponseDto(user.getEmployeeId(), user.getEmail(), user.getName());
     }
+
 }

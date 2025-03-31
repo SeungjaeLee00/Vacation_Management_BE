@@ -4,7 +4,7 @@ package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.LoginRequest;
 import com.example.vacation_reservation.dto.UserResponseDto;
-import com.example.vacation_reservation.security.JwtTokenProvider;
+import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,9 +61,18 @@ public class AuthController {
 
     // 내 정보 조회(로그인 후 접근 가능)
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getMe() {
+    public ResponseEntity<UserResponseDto> getMe(HttpServletRequest request) {
+        // HTTP 요청에서 JWT 토큰 추출 (JwtAuthenticationFilter에서 제공)
+        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+
+        if (token == null) {
+            return ResponseEntity.status(401).body(null); // 토큰이 없으면 401 Unauthorized 반환
+        }
+
         // 현재 인증된 사용자 정보 가져오기
-        UserResponseDto userResponseDto = userService.getCurrentUser();
+        UserResponseDto userResponseDto = userService.getCurrentUser(token);
+
         return ResponseEntity.ok(userResponseDto);
     }
 }
+

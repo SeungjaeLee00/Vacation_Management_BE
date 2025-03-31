@@ -2,15 +2,27 @@ package com.example.vacation_reservation.security;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
 
-    private static final String SECRET_KEY = "your-secret-key"; // 비밀 키
-    private static final long VALIDITY_IN_MS = 3600000; // 1시간
+    private static final long VALIDITY_IN_MS = 14400 * 1000; // 4시간
+    //    private static final String SECRET_KEY = "";
+
+    private static String SECRET_KEY;
+
+    @Value("${jwt.secret}")
+    private String secretKeyProperty;
+
+    @PostConstruct
+    private void init() {
+        SECRET_KEY = secretKeyProperty;
+    }
 
     // JWT 토큰 생성
     public static String generateToken(String employeeId) {
@@ -34,12 +46,12 @@ public class JwtTokenProvider {
         }
     }
 
-    // 토큰에서 사번(employeeId) 추출
+    // 이미 받은 JWT 토큰에서 사원번호(employeeId)를 추출하는 역할(파싱)
     public static String getEmployeeIdFromToken(String token) {
         return Jwts.parser()
                 .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody()
-                .getSubject(); // 사번이 "subject"로 설정되어 있으므로, 이를 반환
+                .getSubject();
     }
 }
