@@ -28,14 +28,6 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-//    // 로그인
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-//        // 로그인 서비스 호출
-//        String token = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
-//        return ResponseEntity.ok().body("{\"token\": \"" + token + "\"}");
-//    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         // 로그인 서비스 호출
