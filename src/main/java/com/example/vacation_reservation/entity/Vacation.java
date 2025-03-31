@@ -1,6 +1,7 @@
 package com.example.vacation_reservation.entity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -10,8 +11,11 @@ public class Vacation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String vacationType; // 연차, 하계휴가, 대체휴가 등
+    private String vacationType;  // 연차, 하계휴가, 대체휴가 등
     private String reason; // 휴가 사유
+
+    private LocalDate requestDate = LocalDate.now();
+    private String status = "Pending"; // 휴가 신청 상태 (기본 대기 상태)
 
     // @ElementCollection을 사용하여 List 데이터를 저장할 수 있음
     @ElementCollection
@@ -42,6 +46,22 @@ public class Vacation {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public LocalDate getRequestDate() {
+        return requestDate;
+    }
+
+    public void setRequestDate(LocalDate requestDate) {
+        this.requestDate = requestDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public List<String> getVacationDates() {
