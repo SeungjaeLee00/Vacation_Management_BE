@@ -93,19 +93,34 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 필요한 정보만 담아서 DTO 반환
-        return new UserResponseDto(user.getEmployeeId(), user.getEmail(), user.getName());
+        return new UserResponseDto(user.getEmployeeId(), user.getName(), user.getEmail());
     }
 
     // 비밀번호 확인
     public boolean verifyPassword(String token, String rawPassword) {
+        // JWT 토큰에서 employeeId 추출
         String employeeId = jwtTokenProvider.getEmployeeIdFromToken(token); // JWT 토큰에서 사원번호 추출
 
+        // employeeId로 사용자 조회
         User user = userRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
 //        System.out.println("입력된 비밀번호: " + rawPassword); // 로그로 확인
 //        System.out.println("DB에 저장된 암호화된 비밀번호: " + user.getPassword()); // 로그로 확인
 
+        // 입력한 비밀번호와 DB에 저장된 비밀번호를 비교 (BCrypt)
         return passwordEncoder.matches(rawPassword, user.getPassword()); // 입력 비밀번호와 암호화된 비밀번호 비교
+    }
+
+    // 사용자 이름 바꾸기
+    public boolean updateUserName(String token, String newName) {
+        String employeeId = jwtTokenProvider.getEmployeeIdFromToken(token);
+        User user = userRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        user.setName(newName);
+        System.out.println("입력된 newName: " + newName); // 로그로 확인
+        userRepository.save(user);
+
+        return true;
     }
 }

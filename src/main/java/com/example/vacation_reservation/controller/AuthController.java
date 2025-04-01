@@ -3,11 +3,14 @@
 package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.LoginRequest;
+import com.example.vacation_reservation.dto.PasswordCheckRequest;
 import com.example.vacation_reservation.dto.UserResponseDto;
+import com.example.vacation_reservation.dto.UserUpdateRequestDto;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,6 +68,52 @@ public class AuthController {
         UserResponseDto userResponseDto = userService.getCurrentUser(token);
 
         return ResponseEntity.ok(userResponseDto);
+    }
+
+    // 비밀번호 확인
+    @PostMapping("/check-password")
+    public ResponseEntity<String> verifyPassword(
+            @RequestHeader("Authorization") String token, // JWT 토큰
+            @RequestBody PasswordCheckRequest passwordCheckRequest) {
+
+        // JWT 토큰에서 "Bearer " 제거
+        if (token.startsWith("Bearer ")) {
+            token = token.substring(7);
+        }
+
+//        System.out.println("사용자가 입력한 비밀번호: " + passwordCheckRequest.getPassword()); // 사용자 입력 비밀번호
+        String rawPassword = passwordCheckRequest.getPassword(); // 사용자가 입력한 비밀번호
+
+        // 비밀번호 확인 로직 호출
+        boolean isPasswordValid = userService.verifyPassword(token, rawPassword);
+
+        if (isPasswordValid) {
+            return ResponseEntity.ok("비밀번호가 일치합니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+        }
+    }
+
+    // 이름 바꾸기
+    @PutMapping("/update-name")
+    public ResponseEntity<String> updateUserName(
+            @RequestBody UserUpdateRequestDto requestDto,
+            HttpServletRequest request) {
+
+        // JWT 토큰 가져오기
+        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+        if (token == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        }
+
+        // 이름 변경 실행
+        boolean isUpdated = userService.updateUserName(token, requestDto.getNewName());
+
+        if(isUpdated) {
+            return ResponseEntity.ok("이름이 성공적으로 변경되었습니다.");
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이름 변경에 실패했습니다.");
+        }
     }
 }
 

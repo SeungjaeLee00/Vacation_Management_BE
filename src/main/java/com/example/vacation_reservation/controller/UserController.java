@@ -49,27 +49,5 @@ public class UserController {
         }
     }
 
-    // 비밀번호 확인
-    @PostMapping("/check-password")
-    public ResponseEntity<String> verifyPassword(
-            @RequestHeader("Authorization") String token, // JWT 토큰
-            @RequestBody PasswordCheckRequest passwordCheckRequest) {
 
-        // JWT 토큰에서 "Bearer " 제거
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
-        }
-
-//        System.out.println("사용자가 입력한 비밀번호: " + passwordCheckRequest.getPassword()); // 사용자 입력 비밀번호
-        String rawPassword = passwordCheckRequest.getPassword(); // 사용자가 입력한 비밀번호
-
-        // 비밀번호 확인 로직 호출
-        boolean isPasswordValid = userService.verifyPassword(token, rawPassword);
-
-        if (isPasswordValid) {
-            return ResponseEntity.ok("비밀번호가 일치합니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
-        }
-    }
 }
