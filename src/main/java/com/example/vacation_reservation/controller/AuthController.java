@@ -2,16 +2,14 @@
 
 package com.example.vacation_reservation.controller;
 
-import com.example.vacation_reservation.dto.LoginRequest;
-import com.example.vacation_reservation.dto.PasswordCheckRequest;
-import com.example.vacation_reservation.dto.UserResponseDto;
-import com.example.vacation_reservation.dto.UserUpdateRequestDto;
+import com.example.vacation_reservation.dto.*;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -115,5 +113,28 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이름 변경에 실패했습니다.");
         }
     }
+
+    // 사용자 비밀번호 바꾸기
+    @PutMapping("/change-password")
+    public ResponseEntity<String> changePassword(
+            @RequestBody ChangePasswordRequestDto changePasswordRequestDto,
+            HttpServletRequest request) {
+
+        // JWT 토큰 가져오기
+        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+
+        if (token == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
+        try {
+            // 비밀번호 변경 처리
+            userService.changePassword(token, changePasswordRequestDto);
+            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
+        }
+    }
+
 }
 

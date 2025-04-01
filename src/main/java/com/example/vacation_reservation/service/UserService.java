@@ -1,5 +1,6 @@
 package com.example.vacation_reservation.service;
 
+import com.example.vacation_reservation.dto.ChangePasswordRequestDto;
 import com.example.vacation_reservation.dto.UserRequestDto;
 import com.example.vacation_reservation.dto.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
@@ -121,6 +122,29 @@ public class UserService {
         System.out.println("입력된 newName: " + newName); // 로그로 확인
         userRepository.save(user);
 
+        return true;
+    }
+
+    // 사용자 비밀번호 바꾸기
+    public boolean changePassword(String token, ChangePasswordRequestDto changePasswordRequestDto) {
+        // JWT 토큰에서 사용자 ID 추출 (가정)
+        String employeeId = jwtTokenProvider.getEmployeeIdFromToken(token);
+        User user = userRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 현재 비밀번호 검증
+        if (!passwordEncoder.matches(changePasswordRequestDto.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호와 확인 비밀번호가 일치하는지 확인
+        if (!changePasswordRequestDto.getNewPassword().equals(changePasswordRequestDto.getConfirmPassword())) {
+            throw new RuntimeException("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호를 암호화하여 저장
+        user.setPassword(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
+        userRepository.save(user);
         return true;
     }
 }
