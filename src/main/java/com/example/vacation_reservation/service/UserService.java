@@ -6,8 +6,6 @@ import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -92,10 +90,22 @@ public class UserService {
 
         // 사용자 정보 가져오기 (employeeId로 사용자 조회)
         User user = userRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         // 필요한 정보만 담아서 DTO 반환
         return new UserResponseDto(user.getEmployeeId(), user.getEmail(), user.getName());
     }
 
+    // 비밀번호 확인
+    public boolean verifyPassword(String token, String rawPassword) {
+        String employeeId = jwtTokenProvider.getEmployeeIdFromToken(token); // JWT 토큰에서 사원번호 추출
+
+        User user = userRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+//        System.out.println("입력된 비밀번호: " + rawPassword); // 로그로 확인
+//        System.out.println("DB에 저장된 암호화된 비밀번호: " + user.getPassword()); // 로그로 확인
+
+        return passwordEncoder.matches(rawPassword, user.getPassword()); // 입력 비밀번호와 암호화된 비밀번호 비교
+    }
 }

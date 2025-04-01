@@ -1,7 +1,6 @@
 package com.example.vacation_reservation.dto;
 
 import java.time.LocalDate;
-import java.util.List;
 
 public class VacationResponseDto {
 
