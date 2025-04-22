@@ -1,11 +1,9 @@
 package com.example.vacation_reservation.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class ChangePasswordRequestDto {
     private String currentPassword;  // 현재 비밀번호

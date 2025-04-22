@@ -1,12 +1,10 @@
 package com.example.vacation_reservation.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 public class UserUpdateRequestDto {
-    private String newName; // 변경할 이름
+    private String newName;
 }

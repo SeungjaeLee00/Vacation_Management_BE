@@ -3,17 +3,10 @@
 package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.ApiResponse;
-import com.example.vacation_reservation.dto.PasswordCheckRequest;
 import com.example.vacation_reservation.dto.UserRequestDto;
-import com.example.vacation_reservation.security.JwtTokenProvider;
 import com.example.vacation_reservation.service.UserService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
-import static com.fasterxml.jackson.databind.type.LogicalType.Map;
 
 @RestController
 @RequestMapping("/api/users")

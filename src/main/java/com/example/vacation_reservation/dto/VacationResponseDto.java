@@ -1,7 +1,12 @@
 package com.example.vacation_reservation.dto;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDate;
 
+@Data
+@NoArgsConstructor
 public class VacationResponseDto {
 
     private Long id;
@@ -21,59 +26,59 @@ public class VacationResponseDto {
         this.reason = reason;
     }
 
-    public VacationResponseDto() {}
+//    public VacationResponseDto() {}
+//
+//    // Getter 메서드
+//    public Long getId() {
+//        return id;
+//    }
+//
+//    public LocalDate getRequestDate() {
+//        return requestDate;
+//    }
+//
+//    public String getVacationType() {
+//        return vacationType;
+//    }
+//
+//    public String getVacationDates() {
+//        return vacationDates;
+//    }
+//
+//    public String getStatus() {
+//        return status;
+//    }
+//
+//    public String getReason() {
+//        return reason;
+//    }
+//
+//    // Setter 메서드
+//    public void setId(Long id) {
+//        this.id = id;
+//    }
+//
+//    public void setRequestDate(LocalDate requestDate) {
+//        this.requestDate = requestDate;
+//    }
+//
+//    public void setVacationType(String vacationType) {
+//        this.vacationType = vacationType;
+//    }
+//
+//    public void setVacationDates(String vacationDates) {
+//        this.vacationDates = vacationDates;
+//    }
+//
+//    public void setStatus(String status) {
+//        this.status = status;
+//    }
+//
+//    public void setReason(String reason) {
+//        this.reason = reason;
+//    }
 
-    // Getter 메서드
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getRequestDate() {
-        return requestDate;
-    }
-
-    public String getVacationType() {
-        return vacationType;
-    }
-
-    public String getVacationDates() {
-        return vacationDates;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getReason() {
-        return reason;
-    }
-
-    // Setter 메서드
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public void setRequestDate(LocalDate requestDate) {
-        this.requestDate = requestDate;
-    }
-
-    public void setVacationType(String vacationType) {
-        this.vacationType = vacationType;
-    }
-
-    public void setVacationDates(String vacationDates) {
-        this.vacationDates = vacationDates;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public void setReason(String reason) {
-        this.reason = reason;
-    }
-
-    // toString() 메서드 (디버깅 시 유용)
+    // toString(): 디버깅 용
     @Override
     public String toString() {
         return "VacationResponseDto{" +
