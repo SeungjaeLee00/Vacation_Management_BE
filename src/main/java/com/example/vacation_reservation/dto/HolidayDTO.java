@@ -1,3 +1,4 @@
+// 공휴일
 package com.example.vacation_reservation.dto;
 
 import lombok.Data;

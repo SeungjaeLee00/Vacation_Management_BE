@@ -3,6 +3,7 @@
 package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.*;
+import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
@@ -45,45 +47,74 @@ public class AuthController {
 
         return ResponseEntity.ok().body("로그인 성공");
     }
-
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         return ResponseEntity.ok().body("로그아웃 성공");
     }
 
-    // 내 정보 조회(로그인 후 접근 가능)
+//    // 내 정보 조회(로그인 후 접근 가능)
+//    @GetMapping("/me")
+//    public ResponseEntity<UserResponseDto> getMe(HttpServletRequest request) {
+//        // HTTP 요청에서 JWT 토큰 추출 (JwtAuthenticationFilter에서 제공)
+//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+//
+//        if (token == null) {
+//            return ResponseEntity.status(401).body(null); // 토큰이 없으면 401 Unauthorized 반환
+//        }
+//
+//        // 현재 인증된 사용자 정보 가져오기
+//        UserResponseDto userResponseDto = userService.getCurrentUser(token);
+//
+//        return ResponseEntity.ok(userResponseDto);
+//    }
     @GetMapping("/me")
-    public ResponseEntity<UserResponseDto> getMe(HttpServletRequest request) {
-        // HTTP 요청에서 JWT 토큰 추출 (JwtAuthenticationFilter에서 제공)
-        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-
-        if (token == null) {
-            return ResponseEntity.status(401).body(null); // 토큰이 없으면 401 Unauthorized 반환
-        }
-
-        // 현재 인증된 사용자 정보 가져오기
-        UserResponseDto userResponseDto = userService.getCurrentUser(token);
-
-        return ResponseEntity.ok(userResponseDto);
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        User user = userDetails.getUser();
+        UserResponseDto dto = new UserResponseDto(user.getEmployeeId(), user.getName(), user.getEmail());
+        return ResponseEntity.ok(dto);
     }
 
-    // 비밀번호 확인
+
+// 비밀번호 확인
+//    @PostMapping("/check-password")
+//    public ResponseEntity<String> verifyPassword
+//            (
+//                    @AuthenticationPrincipal User user,
+//            HttpServletRequest request,
+//            @RequestBody PasswordCheckRequest passwordCheckRequest) {
+//
+//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+//
+//        if (token == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT 토큰이 없습니다.");
+//        }
+//
+//        System.out.println("사용자가 입력한 비밀번호: " + passwordCheckRequest.getPassword()); // 사용자 입력 비밀번호
+//        String rawPassword = passwordCheckRequest.getPassword(); // 사용자가 입력한 비밀번호
+//
+//        // 비밀번호 확인 로직 호출
+//        boolean isPasswordValid = userService.verifyPassword(token, rawPassword);
+//
+//        if (isPasswordValid) {
+//            return ResponseEntity.ok("비밀번호가 일치합니다.");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+//        }
+//    }
     @PostMapping("/check-password")
     public ResponseEntity<String> verifyPassword(
-            @RequestHeader("Authorization") String token, // JWT 토큰
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody PasswordCheckRequest passwordCheckRequest) {
 
-        // JWT 토큰에서 "Bearer " 제거
-        if (token.startsWith("Bearer ")) {
-            token = token.substring(7);
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
         }
 
-//        System.out.println("사용자가 입력한 비밀번호: " + passwordCheckRequest.getPassword()); // 사용자 입력 비밀번호
-        String rawPassword = passwordCheckRequest.getPassword(); // 사용자가 입력한 비밀번호
+        String rawPassword = passwordCheckRequest.getPassword();  // 사용자 입력 비밀번호
+        User user = userDetails.getUser();  // 실제 User 엔티티
 
-        // 비밀번호 확인 로직 호출
-        boolean isPasswordValid = userService.verifyPassword(token, rawPassword);
+        boolean isPasswordValid = userService.verifyPassword(user, rawPassword);
 
         if (isPasswordValid) {
             return ResponseEntity.ok("비밀번호가 일치합니다.");
@@ -92,47 +123,77 @@ public class AuthController {
         }
     }
 
+
     // 이름 바꾸기
+//    @PutMapping("/update-name")
+//    public ResponseEntity<String> updateUserName(
+//            @RequestBody UserUpdateRequestDto requestDto,
+//            HttpServletRequest request) {
+//
+//        // JWT 토큰 가져오기
+//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+//        if (token == null) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+//        }
+//
+//        // 이름 변경 실행
+//        boolean isUpdated = userService.updateUserName(token, requestDto.getNewName());
+//
+//        if(isUpdated) {
+//            return ResponseEntity.ok("이름이 성공적으로 변경되었습니다.");
+//        } else {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이름 변경에 실패했습니다.");
+//        }
+//    }
     @PutMapping("/update-name")
-    public ResponseEntity<String> updateUserName(
-            @RequestBody UserUpdateRequestDto requestDto,
-            HttpServletRequest request) {
+    public ResponseEntity<String> changeName(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ChangeNameRequestDto dto) {
 
-        // JWT 토큰 가져오기
-        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-        if (token == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
         }
 
-        // 이름 변경 실행
-        boolean isUpdated = userService.updateUserName(token, requestDto.getNewName());
-
-        if(isUpdated) {
-            return ResponseEntity.ok("이름이 성공적으로 변경되었습니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이름 변경에 실패했습니다.");
-        }
+        userService.updateUserName(userDetails.getUser(), dto.getNewName());
+        return ResponseEntity.ok("이름이 변경되었습니다.");
     }
 
+
     // 사용자 비밀번호 바꾸기
+//    @PutMapping("/change-password")
+//    public ResponseEntity<String> changePassword(
+//            @RequestBody ChangePasswordRequestDto changePasswordRequestDto,
+//            HttpServletRequest request) {
+//
+//        // JWT 토큰 가져오기
+//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
+//
+//        if (token == null) {
+//            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+//        }
+//
+//        try {
+//            // 비밀번호 변경 처리
+//            userService.changePassword(token, changePasswordRequestDto);
+//            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//        } catch (RuntimeException e) {
+//            return ResponseEntity.status(400).body(e.getMessage());
+//        }
+//    }
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
-            @RequestBody ChangePasswordRequestDto changePasswordRequestDto,
-            HttpServletRequest request) {
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestBody ChangePasswordRequestDto dto) {
 
-        // JWT 토큰 가져오기
-        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-
-        if (token == null) {
-            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
         }
 
         try {
-            // 비밀번호 변경 처리
-            userService.changePassword(token, changePasswordRequestDto);
-            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+            userService.changePassword(userDetails.getUser(), dto);
+            return ResponseEntity.ok("비밀번호가 변경되었습니다.");
         } catch (RuntimeException e) {
-            return ResponseEntity.status(400).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 

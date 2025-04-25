@@ -13,21 +13,21 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/holidays")
-@RequiredArgsConstructor  // 자동으로 생성자 주입해주는 롬복 어노테이션
+@RequiredArgsConstructor
 public class HolidayController {
 
     private final HolidayService holidayService;  // 공휴일 디비에 저장
     private final HolidayRepository holidayRepository;  // 데이터베이스 접근을 위한 레포
 
-    // 특정 월 공휴일 저장
-    @GetMapping("/fetch")
-    public String fetchHolidays(
-            @RequestParam int year,
-            @RequestParam int month
-    ) {
-        holidayService.fetchHolidays(year, month);
-        return String.format("%d년 %d월 공휴일 데이터 저장", year, month);
-    }
+//    // 특정 월 공휴일 저장
+//    @GetMapping("/fetch")
+//    public String fetchHolidays(
+//            @RequestParam int year,
+//            @RequestParam int month
+//    ) {
+//        holidayService.fetchHolidays(year, month);
+//        return String.format("%d년 %d월 공휴일 데이터 저장", year, month);
+//    }
 
     // 전체 공휴일 저장
     @PostMapping("/fetch-all")
