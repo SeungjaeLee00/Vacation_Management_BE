@@ -12,7 +12,6 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Service
@@ -33,7 +32,8 @@ public class HolidayService {
                     encodedServiceKey, year, month
             );
 
-            URI uri = new URI(url);  // url 클래스로 해결
+            // 시크릿코드 왜 안 유효하지 -> url 클래스로 해결
+            URI uri = new URI(url);
 
 //            System.out.println("요청 URL: " + uri.toString());
 
@@ -42,7 +42,7 @@ public class HolidayService {
 
 //            System.out.println("response" + response);
             String responseBody = response.getBody();
-            System.out.println("Raw response: " + responseBody);
+//            System.out.println("Raw response: " + responseBody);
 
             // JSON 파싱
             ObjectMapper objectMapper = new ObjectMapper();
@@ -79,7 +79,8 @@ public class HolidayService {
             return;
         }
 
-        Holiday holiday = new Holiday(null, date, name);
+        Holiday holiday = new Holiday(null, date, name, true);
+
         holidayRepository.save(holiday);
         System.out.println("저장된 공휴일: " + date + " / " + name);
     }
@@ -89,7 +90,7 @@ public class HolidayService {
         for (int month = 1; month <= 12; month++) {
             fetchHolidays(year, month);
         }
-        System.out.println(year + "년 전체 공휴일 저장 완료!");
+        System.out.println(year + "년 전체 공휴일 저장 완료");
     }
 
 }

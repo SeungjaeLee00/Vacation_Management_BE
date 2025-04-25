@@ -1,28 +1,56 @@
 package com.example.vacation_reservation.entity;
 
-import lombok.Data;  
-// @Data 어노테이션을 사용하면 Lombok 라이브러리가 자동으로 getter, setter, toString, equals, hashCode 같은 메서드를 생성해줌
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
+@Table(name = "ojt_Vacation")
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vacation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String vacationType;  // 연차, 하계휴가, 대체휴가 등
-    private String reason; // 휴가 사유
+    // User와 N:1
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-    private LocalDate requestDate = LocalDate.now();
-    private String status = "Pending"; // 휴가 신청 상태 (기본 대기 상태)
 
-    @ElementCollection
-    @CollectionTable(name = "vacation_dates", joinColumns = @JoinColumn(name = "vacation_id"))
-    @Column(name = "vacation_date")
-    private List<String> vacationDates; // 휴가 날짜 (여러 날짜 선택 가능)
+    @OneToMany(mappedBy = "vacation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VacationUsed> usedVacations;
+
+
+    // 관리자도 User 테이블 참조
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
+
+    @Lob  // text 타입 매핑
+    @Column(nullable = false)
+    private String reason;
+
+    @Column(nullable = false, length = 10)
+    private String status = "PENDING";
+
+    @Column(name = "start_at", nullable = false)
+    private LocalDate startAt;
+
+    @Column(name = "end_at", nullable = false)
+    private LocalDate endAt;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDate RequestDate;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
