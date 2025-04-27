@@ -5,6 +5,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface VacationRepository extends JpaRepository<Vacation, Long> {
 
 //    // 상태로 필터링
@@ -19,6 +21,7 @@ public interface VacationRepository extends JpaRepository<Vacation, Long> {
     Page<Vacation> findAll(Pageable pageable);
 
     // 사용자에 따라 휴가 조회
-    Page<Vacation> findByUser_EmployeeId(String employeeId, Pageable pageable);
+//    <Vacation> findByUser_EmployeeId(String employeeId, Pageable pageable);
+    List<Vacation> findByUser_EmployeeId(String employeeId);
 
 }

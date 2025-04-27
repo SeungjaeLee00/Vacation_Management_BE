@@ -84,18 +84,28 @@ public class VacationController {
     }
 
     // 내가 신청한 휴가 목록 조회
-    @GetMapping("/my-vacations")
-    public ResponseEntity<Page<VacationResponseDto>> getMyVacations(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(required = false) String searchText,
-            @RequestParam(required = false) String status) {
+//    @GetMapping("/my-vacations")
+//    public ResponseEntity<Page<VacationResponseDto>> getMyVacations(
+//            @AuthenticationPrincipal CustomUserDetails userDetails,
+//            @RequestParam(defaultValue = "1") int page,
+//            @RequestParam(defaultValue = "5") int size,
+//            @RequestParam(required = false) String searchText,
+//            @RequestParam(required = false) String status) {
+//
+////        Page<VacationResponseDto> vacations = vacationService.getMyVacations(page, size, searchText, status);
+//        User user = userDetails.getUser();
+//        Page<VacationResponseDto> vacations = vacationService.getMyVacations(user.getEmployeeId(), page, size);
+//        return ResponseEntity.ok(vacations);
+//    }
 
-//        Page<VacationResponseDto> vacations = vacationService.getMyVacations(page, size, searchText, status);
+    @GetMapping("/my-vacations")
+    public ResponseEntity<List<VacationResponseDto>> getMyVacations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         User user = userDetails.getUser();
-        Page<VacationResponseDto> vacations = vacationService.getMyVacations(user.getEmployeeId(), page, size);
+        List<VacationResponseDto> vacations = vacationService.getAllMyVacations(user.getEmployeeId());
         return ResponseEntity.ok(vacations);
     }
+
 }
 

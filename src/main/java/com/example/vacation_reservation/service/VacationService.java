@@ -5,9 +5,6 @@ import com.example.vacation_reservation.dto.vacation.VacationUsedDto;
 import com.example.vacation_reservation.entity.Vacation;
 import com.example.vacation_reservation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -32,12 +29,10 @@ public class VacationService {
     }
 
     // 내가 신청한 휴가 목록 조회
-    public Page<VacationResponseDto> getMyVacations(String employeeId, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public List<VacationResponseDto> getAllMyVacations(String employeeId) {
+        List<Vacation> vacations = vacationRepository.findByUser_EmployeeId(employeeId);
 
-        Page<Vacation> vacationPage = vacationRepository.findByUser_EmployeeId(employeeId, pageable);
-
-        return vacationPage.map(vacation -> {
+        return vacations.stream().map(vacation -> {
             List<VacationUsedDto> usedVacations = new ArrayList<>();
             if (vacation.getUsedVacations() != null && !vacation.getUsedVacations().isEmpty()) {
                 usedVacations = vacation.getUsedVacations().stream()
@@ -57,8 +52,7 @@ public class VacationService {
                     vacation.getEndAt().toString(),
                     usedVacations
             );
-        });
+        }).collect(Collectors.toList());
     }
-
 }
 
