@@ -1,7 +1,9 @@
-package com.example.vacation_reservation.dto;
+package com.example.vacation_reservation.dto.vacation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -9,17 +11,21 @@ public class VacationResponseDto {
 
     private Long id;
     private String requestDate;
-    private String usedVacationSummary;  // 휴가 종류별 사용 일수 합친 문자열
     private String status;
     private String reason;
+    private String startAt;
+    private String endAt;
 
-    // 생성자
-    public VacationResponseDto(Long id, String requestDate, String usedVacationSummary, String status, String reason) {
+    private List<VacationUsedDto> usedVacations;
+
+    public VacationResponseDto(Long id, String requestDate, String status, String reason, String startAt, String endAt,  List<VacationUsedDto> usedVacations) {
         this.id = id;
         this.requestDate = requestDate;
-        this.usedVacationSummary = usedVacationSummary;
         this.status = status;
         this.reason = reason;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.usedVacations = usedVacations;
     }
 
     @Override
@@ -27,9 +33,11 @@ public class VacationResponseDto {
         return "VacationResponseDto{" +
                 "id=" + id +
                 ", requestDate='" + requestDate + '\'' +
-                ", usedVacationSummary='" + usedVacationSummary + '\'' +
                 ", status='" + status + '\'' +
                 ", reason='" + reason + '\'' +
+                ", startAt='" + startAt + '\'' +
+                ", endAt='" + endAt + '\'' +
+                ", usedVacations='" + usedVacations + '\'' +
                 '}';
     }
 }

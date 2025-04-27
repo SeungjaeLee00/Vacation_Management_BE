@@ -1,6 +1,7 @@
 package com.example.vacation_reservation.service;
 
-import com.example.vacation_reservation.dto.VacationResponseDto;
+import com.example.vacation_reservation.dto.vacation.VacationResponseDto;
+import com.example.vacation_reservation.dto.vacation.VacationUsedDto;
 import com.example.vacation_reservation.entity.Vacation;
 import com.example.vacation_reservation.repository.VacationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,58 +21,44 @@ public class VacationService {
     @Autowired
     private VacationRepository vacationRepository;
 
+    public VacationService(VacationRepository vacationRepository) {
+        this.vacationRepository = vacationRepository;
+    }
+
     // 휴가 신청 저장
-    public void saveVacationRequest(Vacation vacation) {
-        vacationRepository.save(vacation);
+    @Transactional
+    public Vacation saveVacationRequest(Vacation vacation) {
+        return vacationRepository.save(vacation);
     }
 
     // 내가 신청한 휴가 목록 조회
-//    public Page<VacationResponseDto> getMyVacations(int page, int size) {
-//        Pageable pageable = PageRequest.of(page - 1, size);
-//
-//        Page<Vacation> vacationPage = vacationRepository.findAll(pageable);
-//
-//        return vacationPage.map(vacation -> {
-//            // VacationUsed 리스트가 null 아니면 처리
-//            String usedVacationSummary = "";
-//            if (vacation.getUsedVacations() != null && !vacation.getUsedVacations().isEmpty()) {
-//                usedVacationSummary = vacation.getUsedVacations().stream()
-//                        .map(used -> used.getVacationType().getName() + " " + used.getUsedDays() + "일")
-//                        .collect(Collectors.joining(", "));
-//            }
-//
-//            return new VacationResponseDto(
-//                    vacation.getId(),
-//                    vacation.getRequestDate().toString(),  // LocalDate -> String 변환
-//                    usedVacationSummary,                   // 변경된 부분
-//                    vacation.getStatus(),
-//                    vacation.getReason()
-//            );
-//        });
-//    }
     public Page<VacationResponseDto> getMyVacations(String employeeId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        // userId 또는 employeeId로 휴가 조회 (필터링)
         Page<Vacation> vacationPage = vacationRepository.findByUser_EmployeeId(employeeId, pageable);
 
         return vacationPage.map(vacation -> {
-            String usedVacationSummary = "";
+            List<VacationUsedDto> usedVacations = new ArrayList<>();
             if (vacation.getUsedVacations() != null && !vacation.getUsedVacations().isEmpty()) {
-                usedVacationSummary = vacation.getUsedVacations().stream()
-                        .map(used -> used.getVacationType().getName() + " " + used.getUsedDays() + "일")
-                        .collect(Collectors.joining(", "));
+                usedVacations = vacation.getUsedVacations().stream()
+                        .map(used -> new VacationUsedDto(
+                                used.getVacationType().getName(),
+                                used.getUsedDays()
+                        ))
+                        .collect(Collectors.toList());
             }
 
             return new VacationResponseDto(
                     vacation.getId(),
                     vacation.getRequestDate().toString(),
-                    usedVacationSummary,
                     vacation.getStatus(),
-                    vacation.getReason()
+                    vacation.getReason(),
+                    vacation.getStartAt().toString(),
+                    vacation.getEndAt().toString(),
+                    usedVacations
             );
         });
     }
 
-
 }
+
