@@ -1,6 +1,6 @@
 package com.example.vacation_reservation.controller;
 
-import com.example.vacation_reservation.dto.HolidayDTO;
+import com.example.vacation_reservation.dto.holiday.HolidayDTO;
 import com.example.vacation_reservation.repository.HolidayRepository;
 import com.example.vacation_reservation.service.HolidayService;
 import lombok.RequiredArgsConstructor;

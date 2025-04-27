@@ -1,5 +1,5 @@
 // 공휴일
-package com.example.vacation_reservation.dto;
+package com.example.vacation_reservation.dto.holiday;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

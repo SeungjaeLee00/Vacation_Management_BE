@@ -23,13 +23,36 @@ public class VacationService {
     }
 
     // 내가 신청한 휴가 목록 조회
-    public Page<VacationResponseDto> getMyVacations(int page, int size) {
+//    public Page<VacationResponseDto> getMyVacations(int page, int size) {
+//        Pageable pageable = PageRequest.of(page - 1, size);
+//
+//        Page<Vacation> vacationPage = vacationRepository.findAll(pageable);
+//
+//        return vacationPage.map(vacation -> {
+//            // VacationUsed 리스트가 null 아니면 처리
+//            String usedVacationSummary = "";
+//            if (vacation.getUsedVacations() != null && !vacation.getUsedVacations().isEmpty()) {
+//                usedVacationSummary = vacation.getUsedVacations().stream()
+//                        .map(used -> used.getVacationType().getName() + " " + used.getUsedDays() + "일")
+//                        .collect(Collectors.joining(", "));
+//            }
+//
+//            return new VacationResponseDto(
+//                    vacation.getId(),
+//                    vacation.getRequestDate().toString(),  // LocalDate -> String 변환
+//                    usedVacationSummary,                   // 변경된 부분
+//                    vacation.getStatus(),
+//                    vacation.getReason()
+//            );
+//        });
+//    }
+    public Page<VacationResponseDto> getMyVacations(String employeeId, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Vacation> vacationPage = vacationRepository.findAll(pageable);
+        // userId 또는 employeeId로 휴가 조회 (필터링)
+        Page<Vacation> vacationPage = vacationRepository.findByUser_EmployeeId(employeeId, pageable);
 
         return vacationPage.map(vacation -> {
-            // VacationUsed 리스트가 null 아니면 처리
             String usedVacationSummary = "";
             if (vacation.getUsedVacations() != null && !vacation.getUsedVacations().isEmpty()) {
                 usedVacationSummary = vacation.getUsedVacations().stream()
@@ -39,12 +62,13 @@ public class VacationService {
 
             return new VacationResponseDto(
                     vacation.getId(),
-                    vacation.getRequestDate().toString(),  // LocalDate -> String 변환
-                    usedVacationSummary,                   // 변경된 부분
+                    vacation.getRequestDate().toString(),
+                    usedVacationSummary,
                     vacation.getStatus(),
                     vacation.getReason()
             );
         });
     }
+
 
 }

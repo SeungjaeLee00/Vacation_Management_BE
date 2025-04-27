@@ -2,7 +2,11 @@
 
 package com.example.vacation_reservation.controller;
 
-import com.example.vacation_reservation.dto.*;
+import com.example.vacation_reservation.dto.auth.LoginRequest;
+import com.example.vacation_reservation.dto.auth.ChangeNameRequestDto;
+import com.example.vacation_reservation.dto.auth.ChangePasswordRequestDto;
+import com.example.vacation_reservation.dto.auth.PasswordCheckRequest;
+import com.example.vacation_reservation.dto.user.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
@@ -10,7 +14,6 @@ import com.example.vacation_reservation.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 

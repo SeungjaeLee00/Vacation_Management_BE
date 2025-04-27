@@ -1,8 +1,8 @@
 package com.example.vacation_reservation.service;
 
-import com.example.vacation_reservation.dto.ChangePasswordRequestDto;
+import com.example.vacation_reservation.dto.auth.ChangePasswordRequestDto;
 //import com.example.vacation_reservation.dto.UserRequestDto;
-import com.example.vacation_reservation.dto.UserResponseDto;
+import com.example.vacation_reservation.dto.user.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.security.JwtTokenProvider;
@@ -68,7 +68,7 @@ public class UserService {
 //                userRequestDto.getName(),
 //                userRequestDto.getEmail(),
 //                encodedPassword
-////                userRequestDto.isEmailVerified()
+//                userRequestDto.isEmailVerified()
 //        );
 //
 //        userRepository.save(user);
@@ -168,5 +168,31 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(changePasswordRequestDto.getNewPassword()));
         userRepository.save(user);
         return true;
+    }
+
+
+    // 비밀번호 재설정 (비밀번호 찾기/초기화용)
+    public boolean resetPassword(String email, String newPassword, String confirmPassword) {
+        // 이메일로 사용자 찾기
+        System.out.println("찾으려는 이메일: '" + email + "'");
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // 새 비밀번호와 확인 비밀번호가 일치하는지 확인
+        if (!newPassword.equals(confirmPassword)) {
+            throw new RuntimeException("새 비밀번호와 확인 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호 암호화 후 저장
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return true;
+    }
+
+    // 사용자 찾기
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
     }
 }

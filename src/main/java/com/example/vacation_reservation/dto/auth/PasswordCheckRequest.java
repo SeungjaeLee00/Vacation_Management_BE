@@ -1,4 +1,4 @@
-package com.example.vacation_reservation.dto;
+package com.example.vacation_reservation.dto.auth;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
