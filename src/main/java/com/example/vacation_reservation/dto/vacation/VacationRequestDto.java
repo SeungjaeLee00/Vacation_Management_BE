@@ -12,6 +12,6 @@ public class VacationRequestDto {
     private LocalDate startAt;
     private LocalDate endAt;
     private String reason;
-    private List<UsedVacationDto> usedVacations;
+    private List<VacationUsedDto> usedVacations;
 }
 

@@ -32,6 +32,9 @@ public class VacationController {
     public String requestVacation(@RequestBody VacationRequestDto dto,
                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+//        System.out.println("Received startAt: " + dto.getStartAt());
+//        System.out.println("Received endAt: " + dto.getEndAt());
+
         User user = userDetails.getUser();
         vacationService.requestVacation(user, dto);
         return "휴가 신청이 완료되었습니다!";

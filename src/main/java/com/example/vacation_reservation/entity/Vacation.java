@@ -25,10 +25,8 @@ public class Vacation {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
     @OneToMany(mappedBy = "vacation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VacationUsed> usedVacations;
-
 
     // 관리자도 User 테이블 참조
     @ManyToOne(fetch = FetchType.LAZY)

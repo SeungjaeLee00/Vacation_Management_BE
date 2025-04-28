@@ -9,8 +9,6 @@ import com.example.vacation_reservation.entity.VacationType;
 import com.example.vacation_reservation.entity.VacationUsed;
 import com.example.vacation_reservation.repository.VacationRepository;
 import com.example.vacation_reservation.repository.VacationTypeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
@@ -32,7 +30,7 @@ public class VacationService {
     }
 
     // 휴가 신청 저장
-    @Transactional
+    @Transactional  // 이거 쓰면 하나의 트랜잳션에서 메서드 실행됨 -> 작업 전후에 자동으로 트랜잭션 시작/종료 관리하는거임
     public void requestVacation(User user, VacationRequestDto dto) {
         Vacation vacation = new Vacation();
         vacation.setUser(user);
@@ -52,6 +50,10 @@ public class VacationService {
             vu.setVacationType(vt);
 
             vu.setUsedDays(usedDto.getUsedDays());
+
+            vu.setStartTime(usedDto.getStartTime());
+            vu.setEndTime(usedDto.getEndTime());
+
             return vu;
         }).collect(Collectors.toList());
 
@@ -71,7 +73,9 @@ public class VacationService {
                 usedVacations = vacation.getUsedVacations().stream()
                         .map(used -> new VacationUsedDto(
                                 used.getVacationType().getName(),
-                                used.getUsedDays()
+                                used.getUsedDays(),
+                                used.getStartTime(),
+                                used.getEndTime()
                         ))
                         .collect(Collectors.toList());
             }
@@ -81,8 +85,8 @@ public class VacationService {
                     vacation.getRequestDate().toString(),
                     vacation.getStatus(),
                     vacation.getReason(),
-                    vacation.getStartAt().toString(),
-                    vacation.getEndAt().toString(),
+                    vacation.getStartAt(),
+                    vacation.getEndAt(),
                     usedVacations
             );
         }).collect(Collectors.toList());

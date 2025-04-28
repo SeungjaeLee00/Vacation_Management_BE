@@ -3,6 +3,7 @@ package com.example.vacation_reservation.dto.vacation;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -13,12 +14,12 @@ public class VacationResponseDto {
     private String requestDate;
     private String status;
     private String reason;
-    private String startAt;
-    private String endAt;
+    private LocalDate startAt;
+    private LocalDate endAt;
 
     private List<VacationUsedDto> usedVacations;
 
-    public VacationResponseDto(Long id, String requestDate, String status, String reason, String startAt, String endAt,  List<VacationUsedDto> usedVacations) {
+    public VacationResponseDto(Long id, String requestDate, String status, String reason, LocalDate startAt, LocalDate endAt,  List<VacationUsedDto> usedVacations) {
         this.id = id;
         this.requestDate = requestDate;
         this.status = status;

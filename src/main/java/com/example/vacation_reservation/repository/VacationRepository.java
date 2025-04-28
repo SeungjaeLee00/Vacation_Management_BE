@@ -23,5 +23,4 @@ public interface VacationRepository extends JpaRepository<Vacation, Long> {
     // 사용자에 따라 휴가 조회
 //    <Vacation> findByUser_EmployeeId(String employeeId, Pageable pageable);
     List<Vacation> findByUser_EmployeeId(String employeeId);
-
 }
