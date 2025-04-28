@@ -35,6 +35,7 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         // 로그인 서비스 호출
@@ -51,27 +52,14 @@ public class AuthController {
 
         return ResponseEntity.ok().body("로그인 성공");
     }
+    
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         return ResponseEntity.ok().body("로그아웃 성공");
     }
 
-//    // 내 정보 조회(로그인 후 접근 가능)
-//    @GetMapping("/me")
-//    public ResponseEntity<UserResponseDto> getMe(HttpServletRequest request) {
-//        // HTTP 요청에서 JWT 토큰 추출 (JwtAuthenticationFilter에서 제공)
-//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-//
-//        if (token == null) {
-//            return ResponseEntity.status(401).body(null); // 토큰이 없으면 401 Unauthorized 반환
-//        }
-//
-//        // 현재 인증된 사용자 정보 가져오기
-//        UserResponseDto userResponseDto = userService.getCurrentUser(token);
-//
-//        return ResponseEntity.ok(userResponseDto);
-//    }
+    // 내 정보 조회(로그인 후 접근 가능)
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = userDetails.getUser();
@@ -79,33 +67,7 @@ public class AuthController {
         return ResponseEntity.ok(dto);
     }
 
-
-// 비밀번호 확인
-//    @PostMapping("/check-password")
-//    public ResponseEntity<String> verifyPassword
-//            (
-//                    @AuthenticationPrincipal User user,
-//            HttpServletRequest request,
-//            @RequestBody PasswordCheckRequest passwordCheckRequest) {
-//
-//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-//
-//        if (token == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT 토큰이 없습니다.");
-//        }
-//
-//        System.out.println("사용자가 입력한 비밀번호: " + passwordCheckRequest.getPassword()); // 사용자 입력 비밀번호
-//        String rawPassword = passwordCheckRequest.getPassword(); // 사용자가 입력한 비밀번호
-//
-//        // 비밀번호 확인 로직 호출
-//        boolean isPasswordValid = userService.verifyPassword(token, rawPassword);
-//
-//        if (isPasswordValid) {
-//            return ResponseEntity.ok("비밀번호가 일치합니다.");
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
-//        }
-//    }
+    // 비밀번호 확인
     @PostMapping("/check-password")
     public ResponseEntity<String> verifyPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -127,28 +89,7 @@ public class AuthController {
         }
     }
 
-
     // 이름 바꾸기
-//    @PutMapping("/update-name")
-//    public ResponseEntity<String> updateUserName(
-//            @RequestBody UserUpdateRequestDto requestDto,
-//            HttpServletRequest request) {
-//
-//        // JWT 토큰 가져오기
-//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-//        if (token == null) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그인이 필요합니다.");
-//        }
-//
-//        // 이름 변경 실행
-//        boolean isUpdated = userService.updateUserName(token, requestDto.getNewName());
-//
-//        if(isUpdated) {
-//            return ResponseEntity.ok("이름이 성공적으로 변경되었습니다.");
-//        } else {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("이름 변경에 실패했습니다.");
-//        }
-//    }
     @PutMapping("/update-name")
     public ResponseEntity<String> changeName(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -162,28 +103,7 @@ public class AuthController {
         return ResponseEntity.ok("이름이 변경되었습니다.");
     }
 
-
     // 사용자 비밀번호 바꾸기
-//    @PutMapping("/change-password")
-//    public ResponseEntity<String> changePassword(
-//            @RequestBody ChangePasswordRequestDto changePasswordRequestDto,
-//            HttpServletRequest request) {
-//
-//        // JWT 토큰 가져오기
-//        String token = JwtAuthenticationFilter.getJwtFromRequest(request);
-//
-//        if (token == null) {
-//            return ResponseEntity.status(401).body("로그인이 필요합니다.");
-//        }
-//
-//        try {
-//            // 비밀번호 변경 처리
-//            userService.changePassword(token, changePasswordRequestDto);
-//            return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
-//        } catch (RuntimeException e) {
-//            return ResponseEntity.status(400).body(e.getMessage());
-//        }
-//    }
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
