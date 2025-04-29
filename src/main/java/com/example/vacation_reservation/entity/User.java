@@ -3,6 +3,7 @@ package com.example.vacation_reservation.entity;
 import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "ojt_User")
@@ -51,6 +52,10 @@ public class User {
     public enum Role {
         EMPLOYEE, ADMIN
     }
+
+    @OneToMany(mappedBy = "user")
+    private List<UserDepartment> userDepartments; // 내가 속한 부서들 -> 실제로는 1개만 사용
+
 
     public User(String employeeId, String name, String email, String password, Role role) {
         this.employeeId = employeeId;
