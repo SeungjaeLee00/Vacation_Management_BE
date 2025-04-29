@@ -1,4 +1,4 @@
-package com.example.vacation_reservation.entity;
+package com.example.vacation_reservation.entity.vacation;
 
 import lombok.*;
 

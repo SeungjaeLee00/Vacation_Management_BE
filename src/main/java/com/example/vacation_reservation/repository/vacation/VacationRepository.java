@@ -1,6 +1,6 @@
-package com.example.vacation_reservation.repository;
+package com.example.vacation_reservation.repository.vacation;
 
-import com.example.vacation_reservation.entity.Vacation;
+import com.example.vacation_reservation.entity.vacation.Vacation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

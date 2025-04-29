@@ -6,6 +6,8 @@ import com.example.vacation_reservation.dto.user.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.security.JwtTokenProvider;
+import com.example.vacation_reservation.service.email.EmailService;
+import com.example.vacation_reservation.service.email.EmailVerificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

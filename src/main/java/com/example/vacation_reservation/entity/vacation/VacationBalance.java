@@ -1,5 +1,6 @@
-package com.example.vacation_reservation.entity;
+package com.example.vacation_reservation.entity.vacation;
 
+import com.example.vacation_reservation.entity.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;

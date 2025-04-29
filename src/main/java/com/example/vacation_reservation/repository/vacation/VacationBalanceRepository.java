@@ -1,5 +1,5 @@
-package com.example.vacation_reservation.repository;
-import com.example.vacation_reservation.entity.VacationBalance;
+package com.example.vacation_reservation.repository.vacation;
+import com.example.vacation_reservation.entity.vacation.VacationBalance;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

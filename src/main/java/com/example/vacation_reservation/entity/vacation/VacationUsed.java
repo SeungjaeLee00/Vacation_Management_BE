@@ -1,9 +1,8 @@
-package com.example.vacation_reservation.entity;
+package com.example.vacation_reservation.entity.vacation;
 
 import lombok.*;
 
 import javax.persistence.*;
-import java.sql.Time;
 import java.time.LocalTime;
 
 @Entity

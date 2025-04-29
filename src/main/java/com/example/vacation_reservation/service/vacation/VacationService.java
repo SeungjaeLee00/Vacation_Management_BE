@@ -1,12 +1,15 @@
-package com.example.vacation_reservation.service;
+package com.example.vacation_reservation.service.vacation;
 
 import com.example.vacation_reservation.dto.vacation.VacationRequestDto;
 import com.example.vacation_reservation.dto.vacation.VacationResponseDto;
 import com.example.vacation_reservation.dto.vacation.VacationUsedDto;
 import com.example.vacation_reservation.entity.*;
+import com.example.vacation_reservation.entity.vacation.Vacation;
+import com.example.vacation_reservation.entity.vacation.VacationType;
+import com.example.vacation_reservation.entity.vacation.VacationUsed;
 import com.example.vacation_reservation.exception.CustomException;
-import com.example.vacation_reservation.repository.VacationRepository;
-import com.example.vacation_reservation.repository.VacationTypeRepository;
+import com.example.vacation_reservation.repository.vacation.VacationRepository;
+import com.example.vacation_reservation.repository.vacation.VacationTypeRepository;
 
 import org.springframework.stereotype.Service;
 

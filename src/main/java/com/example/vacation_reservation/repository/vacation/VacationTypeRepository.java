@@ -1,6 +1,6 @@
-package com.example.vacation_reservation.repository;
+package com.example.vacation_reservation.repository.vacation;
 
-import com.example.vacation_reservation.entity.VacationType;
+import com.example.vacation_reservation.entity.vacation.VacationType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -45,7 +45,7 @@
 package com.example.vacation_reservation.controller;
 import com.example.vacation_reservation.dto.auth.ForgotPasswordRequest;
 import com.example.vacation_reservation.entity.User;
-import com.example.vacation_reservation.service.EmailService;
+import com.example.vacation_reservation.service.email.EmailService;
 import com.example.vacation_reservation.service.UserService;
 import org.springframework.web.bind.annotation.*;
 

@@ -1,8 +1,8 @@
-package com.example.vacation_reservation.service;
+package com.example.vacation_reservation.service.vacation;
 
 import com.example.vacation_reservation.dto.vacation.VacationBalanceResponseDto;
-import com.example.vacation_reservation.entity.VacationBalance;
-import com.example.vacation_reservation.repository.VacationBalanceRepository;
+import com.example.vacation_reservation.entity.vacation.VacationBalance;
+import com.example.vacation_reservation.repository.vacation.VacationBalanceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,4 +1,4 @@
-package com.example.vacation_reservation.service;
+package com.example.vacation_reservation.service.email;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
