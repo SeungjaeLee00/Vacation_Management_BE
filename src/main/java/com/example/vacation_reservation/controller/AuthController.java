@@ -1,4 +1,7 @@
-// 인증 관련(로그인, 로그아웃, 내 정보 조회)
+/**
+ * 인증 관련 API를 제공하는 컨트롤러 클래스.
+ * 로그인, 로그아웃, 내 정보 조회, 비밀번호 확인, 사용자 정보 변경 등의 기능을 제공
+ */
 
 package com.example.vacation_reservation.controller;
 
@@ -11,6 +14,7 @@ import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,19 +27,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+    private final UserService userService;
 
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private JwtTokenProvider jwtTokenProvider;
-
-    // 로그인
+    /**
+     * 로그인 요청 처리
+     *
+     * @param loginRequest 로그인 요청 DTO (사원번호, 비밀번호 포함)
+     * @param response     응답 객체로 JWT 토큰을 쿠키로 설정
+     * @return 로그인 성공 메시지
+     */
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         // 로그인 서비스 호출
@@ -52,14 +57,26 @@ public class AuthController {
 
         return ResponseEntity.ok().body("로그인 성공");
     }
-    
-    // 로그아웃
+
+    /**
+     * 로그아웃 요청 처리
+     * 현재는 서버 측에서 별도 처리를 하지 않으며, 프론트엔드에서 쿠키 삭제 처리 필요
+     *
+     * @param request HTTP 요청 객체
+     * @return 로그아웃 성공 메시지
+     */
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request) {
         return ResponseEntity.ok().body("로그아웃 성공");
     }
 
-    // 내 정보 조회(로그인 후 접근 가능)
+
+    /**
+     * 현재 로그인된 사용자의 정보 조회
+     *
+     * @param userDetails 인증된 사용자 정보
+     * @return 사용자 정보 DTO (사원번호, 이름, 이메일)
+     */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
         User user = userDetails.getUser();
@@ -67,7 +84,13 @@ public class AuthController {
         return ResponseEntity.ok(dto);
     }
 
-    // 비밀번호 확인
+    /**
+     * 현재 로그인한 사용자의 비밀번호가 일치하는지 확인
+     *
+     * @param userDetails           인증된 사용자 정보
+     * @param passwordCheckRequest 사용자가 입력한 비밀번호
+     * @return 비밀번호 일치 여부 메시지
+     */
     @PostMapping("/check-password")
     public ResponseEntity<String> verifyPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -89,7 +112,14 @@ public class AuthController {
         }
     }
 
-    // 이름 바꾸기
+
+    /**
+     * 현재 로그인한 사용자의 이름을 변경
+     *
+     * @param userDetails 인증된 사용자 정보
+     * @param dto         변경할 이름 DTO
+     * @return 이름 변경 성공 메시지
+     */
     @PutMapping("/update-name")
     public ResponseEntity<String> changeName(
             @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -103,7 +133,13 @@ public class AuthController {
         return ResponseEntity.ok("이름이 변경되었습니다.");
     }
 
-    // 사용자 비밀번호 바꾸기
+    /**
+     * 현재 로그인한 사용자의 비밀번호를 변경
+     *
+     * @param userDetails 인증된 사용자 정보
+     * @param dto         비밀번호 변경 요청 DTO (현재 비밀번호, 새 비밀번호 포함)
+     * @return 비밀번호 변경 성공 또는 실패 메시지
+     */
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,

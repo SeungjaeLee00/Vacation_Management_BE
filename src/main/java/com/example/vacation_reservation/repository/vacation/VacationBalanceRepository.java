@@ -12,5 +12,4 @@ public interface VacationBalanceRepository extends JpaRepository<VacationBalance
 
     // 특정 유저, 연도, 휴가 타입별 잔여 조회
     Optional<VacationBalance> findByUserIdAndVacationTypeIdAndYear(Long userId, Long vacationTypeId, Integer year);
-
 }

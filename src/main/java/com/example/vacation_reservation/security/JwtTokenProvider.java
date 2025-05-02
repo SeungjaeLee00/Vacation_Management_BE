@@ -1,3 +1,7 @@
+/*
+    JWT 토큰 생성, 검증헤 필요한 값 추출
+*/
+
 package com.example.vacation_reservation.security;
 
 import io.jsonwebtoken.Jwts;
@@ -12,7 +16,7 @@ import java.util.Date;
 public class JwtTokenProvider {
 
     private static final long VALIDITY_IN_MS = 14400 * 1000; // 4시간
-    //    private static final String SECRET_KEY = "";
+//    private static final long REFRESH_VALIDITY_MS = 7 * 24 * 60 * 60 * 1000L; // 7일
 
     private static String SECRET_KEY;
 
@@ -25,6 +29,7 @@ public class JwtTokenProvider {
     }
 
     // JWT 토큰 생성
+    // access token
     public static String generateToken(String employeeId) {
         return Jwts.builder()
                 .setSubject(employeeId)
@@ -33,6 +38,17 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
+
+//    // refresh token
+//    public static String generateRefreshToken(String employeeId) {
+//        return Jwts.builder()
+//                .setSubject(employeeId)
+//                .setIssuedAt(new Date())
+//                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_VALIDITY_MS))
+//                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+//                .compact();
+//    }
+
 
     // JWT 토큰 검증
     public static boolean validateToken(String token) {

@@ -1,67 +1,31 @@
-// 회원가입(사용자 등록), 이메일 인증관련
-
-//import com.example.vacation_reservation.dto.ApiResponse;
-//import com.example.vacation_reservation.dto.UserRequestDto;
-//import com.example.vacation_reservation.service.UserService;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//
-//@RestController
-//@RequestMapping("/api/users")
-//public class UserController {
-//
-//    private final UserService userService;
-//
-//    public UserController(UserService userService) {
-//        this.userService = userService;
-//    }
-//
-//    // 회원가입
-//    @PostMapping("/register")
-//    public ResponseEntity<String> register(@RequestBody UserRequestDto userRequestDto) {
-//        String message = userService.registerUser(userRequestDto);
-//        return ResponseEntity.ok(message);
-//    }
-//
-//    // 인증번호 전송
-//    @PostMapping("/send-verification-code")
-//    public String sendVerificationCode(@RequestParam String email) {
-//        return userService.sendVerificationCode(email);
-//    }
-//
-//    // 인증번호 확인
-//    @PostMapping("/verify-code")
-//    public ResponseEntity<?> verifyCode(@RequestParam String email, @RequestParam String code) {
-//        boolean isVerified = userService.verifyCode(email, code);
-//        if (isVerified) {
-//            return ResponseEntity.ok(new ApiResponse(true, "이메일 인증이 완료되었습니다."));
-//        } else {
-//            return ResponseEntity.badRequest().body(new ApiResponse(false, "인증번호가 올바르지 않습니다."));
-//        }
-//    }
-//
-//
-//}
+/**
+ * 사용자 관련 API를 제공하는 컨트롤러 클래스
+ * 비밀번호 찾기 기능을 포함
+ */
 package com.example.vacation_reservation.controller;
 import com.example.vacation_reservation.dto.auth.ForgotPasswordRequest;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.service.email.EmailService;
 import com.example.vacation_reservation.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class UserController {
 
     private final UserService userService;
     private final EmailService emailService;
 
-    public UserController(UserService userService, EmailService emailService) {
-        this.userService = userService;
-        this.emailService = emailService;
-    }
-
-    // 비밀번호 찾기 (임시 비밀번호 발송)
+    /**
+     * 사용자가 비밀번호를 잊어버렸을 때, 임시 비밀번호를 이메일로 발송
+     * 사용자가 입력한 이메일로 임시 비밀번호를 생성하여 발송하며,
+     * 해당 비밀번호를 사용자의 계정에 업데이트.
+     *
+     * @param request 비밀번호를 찾기 위한 이메일 요청 정보 (이메일)
+     * @return 임시 비밀번호가 이메일로 발송되었다는 메시지
+     */
     @PostMapping("/forgot-password")
     public String forgotPassword(@RequestBody ForgotPasswordRequest request) {
         // 이메일로 사용자 찾기
@@ -82,6 +46,11 @@ public class UserController {
         return "임시 비밀번호가 이메일로 발송되었습니다.";
     }
 
+    /**
+     * 랜덤한 임시 비밀번호를 생성하는 메서드
+     *
+     * @return 생성된 임시 비밀번호
+     */
     private String generateRandomPassword() {
         int length = 10;
         String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

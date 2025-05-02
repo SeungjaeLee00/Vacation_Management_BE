@@ -1,3 +1,8 @@
+/**
+ * 공휴일 관련 API를 제공하는 컨트롤러 클래스
+ * 공휴일 정보를 조회하고, 특정 연도의 공휴일 데이터를 저장하는 기능을 제공
+ */
+
 package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.holiday.HolidayDTO;
@@ -12,24 +17,19 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/holidays")
 @RequiredArgsConstructor
+@RequestMapping("/api/holidays")
 public class HolidayController {
 
     private final HolidayService holidayService;  // 공휴일 디비에 저장
     private final HolidayRepository holidayRepository;  // 데이터베이스 접근을 위한 레포
 
-//    // 특정 월 공휴일 저장
-//    @GetMapping("/fetch")
-//    public String fetchHolidays(
-//            @RequestParam int year,
-//            @RequestParam int month
-//    ) {
-//        holidayService.fetchHolidays(year, month);
-//        return String.format("%d년 %d월 공휴일 데이터 저장", year, month);
-//    }
-
-    // 전체 공휴일 저장
+    /**
+     * 특정 연도의 모든 공휴일 데이터를 저장
+     *
+     * @param year 저장할 공휴일의 연도
+     * @return 공휴일 저장 성공 메시지
+     */
     @PostMapping("/fetch-all")
     public ResponseEntity<String> fetchAllHolidays(@RequestParam int year) {
         try {
@@ -40,7 +40,15 @@ public class HolidayController {
         }
     }
 
-    // 공휴일 조회
+    /**
+     * 주어진 기간(시작 연도 및 월, 종료 연도 및 월)에 해당하는 공휴일 정보를 조회
+     *
+     * @param startYear 시작 연도
+     * @param startMonth 시작 월
+     * @param endYear 종료 연도
+     * @param endMonth 종료 월
+     * @return 조회된 공휴일 목록 (HolidayDTO)
+     */
     @GetMapping("/get-holiday")
     public List<HolidayDTO> getHolidays(
             @RequestParam int startYear,

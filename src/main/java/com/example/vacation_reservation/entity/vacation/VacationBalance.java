@@ -30,9 +30,11 @@ public class VacationBalance {
     private Integer year;
 
     @Column(nullable = false)
-    private Double totalDays;
+    private double totalDays;
 
-    private Double usedDays = 0.0;
+    private double usedDays = 0.0;
 
-    private Double remainingDays = 0.0;
+    private double remainingDays = 0.0;
 }
+
+// 휴가 부여 어떻게 할 건지 생각하셈: 스케쥴러...

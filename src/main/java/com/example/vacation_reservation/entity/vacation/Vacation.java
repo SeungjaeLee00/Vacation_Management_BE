@@ -34,7 +34,7 @@ public class Vacation {
     @JoinColumn(name = "approved_by")
     private User approvedBy;
 
-    @Lob  // text 타입 매핑
+    @Lob  // text 타입 매핑, varchar, 200자 내외
     @Column(nullable = false)
     private String reason;
 
@@ -50,6 +50,6 @@ public class Vacation {
     @Column(name = "created_at", nullable = false)
     private LocalDate RequestDate;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)  // 생성할 때 같이 넣어주세요
     private LocalDateTime updatedAt;
 }

@@ -25,5 +25,7 @@ public class Holiday {
     private String name;
 
     @Column(name = "is_national")
-    private Boolean isNational;  // null 가능
+    private Boolean isNational;  // null 가능함. 회사 빨간날은 false로
 }
+
+// 회사 공휴일은 BO에서 관리

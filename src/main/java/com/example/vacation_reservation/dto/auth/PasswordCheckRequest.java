@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 public class PasswordCheckRequest {
     private String password;
 
-    // 생성자: 필드 초기화 용
+    // 필드 초기화 용
     public PasswordCheckRequest(String password) {
         this.password = password;
     }

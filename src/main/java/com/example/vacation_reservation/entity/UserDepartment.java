@@ -17,9 +17,9 @@ public class UserDepartment {
     @JoinColumn(name = "user_id")
     private User user; // 사용자
 
-    @ManyToOne
+    @ManyToOne  // lazy 추가
     @JoinColumn(name = "department_id")
     private Department department; // 소속 부서
 
-    private String position; // 직급
+    private String position;
 }

@@ -1,3 +1,8 @@
+/**
+ * 이메일 전송 관련 기능을 제공하는 서비스 클래스
+ * <p>
+ * 임시 비밀번호 전송 기능과 내부용 랜덤 인증 코드 생성 기능을 제공
+ */
 package com.example.vacation_reservation.service.email;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,23 +20,12 @@ public class EmailService {
 
     private final int CODE_LENGTH = 6;
 
-//    public String sendVerificationCode(String email) {
-//        // 랜덤 인증 코드 생성
-//        String code = generateRandomCode();
-//
-//        // 이메일 내용 설정
-//        SimpleMailMessage message = new SimpleMailMessage();
-//        message.setTo(email);
-//        message.setSubject("이메일 인증 코드");
-//        message.setText("인증 코드: " + code);
-//
-//        // 이메일 발송
-//        mailSender.send(message);
-//
-//        return code;
-//    }
-
-    // 임시 비밀번호 보내기
+    /**
+     * 지정된 이메일 주소로 임시 비밀번호를 전송
+     *
+     * @param email        수신자 이메일 주소
+     * @param tempPassword 전송할 임시 비밀번호
+     */
     public void sendTemporaryPassword(String email, String tempPassword) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(email);
@@ -41,8 +35,11 @@ public class EmailService {
         mailSender.send(message);
     }
 
-
-    // 랜덤 인증 코드 생성
+    /**
+     * 0~9 사이의 숫자를 조합하여 6자리의 랜덤 인증 코드를 생성
+     *
+     * @return 생성된 랜덤 인증 코드 문자열
+     */
     private String generateRandomCode() {
         Random rand = new Random();
         StringBuilder sb = new StringBuilder();
