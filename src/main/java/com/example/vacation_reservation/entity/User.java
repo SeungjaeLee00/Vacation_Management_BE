@@ -42,6 +42,9 @@ public class User {
         EMPLOYEE, ADMIN
     }
 
+    @Column(name = "refresh_token", nullable = false, length = 512)
+    private String refreshToken;
+
     @OneToMany(mappedBy = "user")
     private List<UserDepartment> userDepartments; // 내가 속한 부서들 -> 실제로는 1개만 사용
 

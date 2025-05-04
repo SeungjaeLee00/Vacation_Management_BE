@@ -15,8 +15,10 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private static final long VALIDITY_IN_MS = 14400 * 1000; // 4시간
-//    private static final long REFRESH_VALIDITY_MS = 7 * 24 * 60 * 60 * 1000L; // 7일
+//    private static final long VALIDITY_IN_MS = 14400 * 1000; // 4시간
+    private static final long ACCESS_TOKEN_VALIDITY_MS = 15 * 60 * 1000; // 15분
+    private static final long REFRESH_TOKEN_VALIDITY_MS = 4 * 60 * 60 * 1000; // 4시간
+
 
     private static String SECRET_KEY;
 
@@ -28,34 +30,31 @@ public class JwtTokenProvider {
         SECRET_KEY = secretKeyProperty;
     }
 
-    // JWT 토큰 생성
     // access token
-    public static String generateToken(String employeeId) {
+    public static String generateAccessToken(String employeeId) {
         return Jwts.builder()
                 .setSubject(employeeId)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + VALIDITY_IN_MS))
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_MS))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
-//    // refresh token
-//    public static String generateRefreshToken(String employeeId) {
-//        return Jwts.builder()
-//                .setSubject(employeeId)
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_VALIDITY_MS))
-//                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-//                .compact();
-//    }
+    // refresh token
+    public static String generateRefreshToken(String employeeId) {
+        return Jwts.builder()
+                .setSubject(employeeId)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_VALIDITY_MS))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
+    }
 
 
     // JWT 토큰 검증
     public static boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
-                    .parseClaimsJws(token);
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             return false;

@@ -13,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Validated
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+
 
     /**
      * 주어진 사번과 비밀번호를 기반으로 로그인 처리.
@@ -34,7 +39,8 @@ public class AuthService {
      * @return JWT 토큰 문자열
      * @throws RuntimeException 사번에 해당하는 사용자가 없거나 비밀번호가 틀린 경우 예외 발생
      */
-    public String login(String employeeId, String password) {
+    public Map<String, String> login(String employeeId, String password)
+    {
         User user = userRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new RuntimeException("해당 사번을 가진 사용자가 존재하지 않습니다."));
 
@@ -43,10 +49,36 @@ public class AuthService {
             throw new RuntimeException("비밀번호가 올바르지 않습니다.");
         }
 
-        // 로그인 성공 시 JWT 토큰 생성
-        return JwtTokenProvider.generateToken(user.getEmployeeId());
+//        // 로그인 성공 시 JWT 토큰 생성
+//        return JwtTokenProvider.generateAccessToken(user.getEmployeeId());
+        // Access, Refresh Token 생성
+        String accessToken = JwtTokenProvider.generateAccessToken(user.getEmployeeId());
+        String refreshToken = JwtTokenProvider.generateRefreshToken(user.getEmployeeId());
+
+        // Refresh Token DB에 저장
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        // 두 토큰 반환
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", accessToken);
+        tokens.put("refreshToken", refreshToken);
+        return tokens;
+    }
+
+    /**
+     * Refresh Token을 이용해 새로운 Access Token 발급
+     */
+    public String refreshAccessToken(String refreshToken) {
+        // Refresh Token 검증
+        if (!jwtTokenProvider.validateToken(refreshToken)) {
+            throw new RuntimeException("리프레시 토큰이 유효하지 않거나 만료되었습니다.");
+        }
+
+        // Refresh Token에서 사용자 정보 추출
+        String employeeId = jwtTokenProvider.getEmployeeIdFromToken(refreshToken);
+
+        // 새로운 Access Token 발급
+        return jwtTokenProvider.generateAccessToken(employeeId);
     }
 }
-
-// 세션을 주로 쓰고, 세션+토큰 이렇게도 씀
-// refresh token 을 4시간으로 설정

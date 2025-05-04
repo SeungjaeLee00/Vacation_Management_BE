@@ -25,6 +25,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -44,18 +46,22 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         // 로그인 서비스 호출
-        String token = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
+        Map<String, String> tokens = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
 
-        // 쿠키에 JWT 토큰 설정
-        Cookie cookie = new Cookie("Token", token);
-        cookie.setHttpOnly(false);
-        cookie.setSecure(true);    // HTTPS 환경에서만 쿠키 전송
-        cookie.setPath("/");       // 애플리케이션의 모든 경로에서 쿠키를 사용할 수 있도록 설정
-        cookie.setMaxAge(14400);    // 쿠키의 유효기간 설정 (4시간)
+        // 쿠키에 JWT 토큰 설정 (Access Token)
+        Cookie accessTokenCookie = new Cookie("accessToken", tokens.get("accessToken"));
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(true);    // HTTPS 환경에서만 쿠키 전송
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(900);    // 쿠키의 유효기간 설정 (15분)
 
-        response.addCookie(cookie);
+        // 쿠키에 JWT 토큰 설정 (Refresh Token은 DB에 저장)
+        response.addCookie(accessTokenCookie);
 
-        return ResponseEntity.ok().body("로그인 성공");
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("message", "Login successful");
+
+        return ResponseEntity.ok(responseBody);
     }
 
     /**
@@ -112,7 +118,6 @@ public class AuthController {
         }
     }
 
-
     /**
      * 현재 로그인한 사용자의 이름을 변경
      *
@@ -157,5 +162,28 @@ public class AuthController {
         }
     }
 
+    /**
+     * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급하는 API
+     */
+    @PostMapping("/refresh-token")
+    public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> refreshTokenRequest) {
+        String refreshToken = refreshTokenRequest.get("refreshToken");
+
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("리프레시 토큰이 필요합니다.");
+        }
+
+        try {
+            // refresh token을 사용하여 새로운 access token을 발급
+            String newAccessToken = authService.refreshAccessToken(refreshToken);
+
+            // 새로운 access token 반환
+            Map<String, String> responseMap = new HashMap<>();
+            responseMap.put("accessToken", newAccessToken);
+            return ResponseEntity.ok(responseMap);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("리프레시 토큰이 유효하지 않거나 만료되었습니다.");
+        }
+    }
 }
 

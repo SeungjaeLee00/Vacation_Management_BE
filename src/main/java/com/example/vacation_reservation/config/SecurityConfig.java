@@ -3,6 +3,7 @@ package com.example.vacation_reservation.config;
 import com.example.vacation_reservation.security.JwtAuthenticationFilter;
 import com.example.vacation_reservation.security.JwtTokenProvider;
 import com.example.vacation_reservation.service.CustomUserDetailsService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -21,21 +22,11 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
  * JWT 기반의 인증 및 인가를 적용하며, 세션은 사용하지 않음.
  */
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
-
-    /**
-     * SecurityConfig 생성자
-     *
-     * @param jwtTokenProvider JWT 토큰 제공자
-     * @param customUserDetailsService 사용자 정보 서비스
-     */
-    public SecurityConfig(JwtTokenProvider jwtTokenProvider, CustomUserDetailsService customUserDetailsService) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.customUserDetailsService = customUserDetailsService;
-    }
 
     /**
      * Spring Security 필터 체인 설정
@@ -96,6 +87,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
         corsConfiguration.addAllowedOrigin("http://localhost:8081"); // 프론트엔드 주소
+
         corsConfiguration.addAllowedMethod(HttpMethod.GET);
         corsConfiguration.addAllowedMethod(HttpMethod.POST);
         corsConfiguration.addAllowedMethod(HttpMethod.PUT);
