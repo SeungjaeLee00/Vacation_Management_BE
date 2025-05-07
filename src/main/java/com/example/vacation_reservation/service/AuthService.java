@@ -49,8 +49,7 @@ public class AuthService {
             throw new RuntimeException("비밀번호가 올바르지 않습니다.");
         }
 
-//        // 로그인 성공 시 JWT 토큰 생성
-//        return JwtTokenProvider.generateAccessToken(user.getEmployeeId());
+        // 로그인 성공 시 JWT 토큰 생성
         // Access, Refresh Token 생성
         String accessToken = JwtTokenProvider.generateAccessToken(user.getEmployeeId());
         String refreshToken = JwtTokenProvider.generateRefreshToken(user.getEmployeeId());
@@ -81,4 +80,16 @@ public class AuthService {
         // 새로운 Access Token 발급
         return jwtTokenProvider.generateAccessToken(employeeId);
     }
+
+    /**
+     * Refresh Token 삭제
+     * @param employeeId
+     */
+    public void clearRefreshToken(String employeeId) {
+        userRepository.findByEmployeeId(employeeId).ifPresent(user -> {
+            user.setRefreshToken(null);
+            userRepository.save(user);
+        });
+    }
+
 }

@@ -16,7 +16,9 @@ import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -66,16 +68,37 @@ public class AuthController {
 
     /**
      * 로그아웃 요청 처리
-     * 현재는 서버 측에서 별도 처리를 하지 않으며, 프론트엔드에서 쿠키 삭제 처리 필요
-     *
-     * @param request HTTP 요청 객체
-     * @return 로그아웃 성공 메시지
+     * 서버에서 Access Token 쿠키 삭제, Refresh Token null 처리
+     * @param userDetails
+     * @param response
+     * @return
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request) {
-        return ResponseEntity.ok().body("로그아웃 성공");
-    }
+    public ResponseEntity<?> logout( @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
+        try {
+            // 현재 로그인한 사용자 사번(employeeId) 추출
+            String employeeId = userDetails.getUser().getEmployeeId();
 
+            // Refresh Token 삭제 (User 테이블에서 null 처리)
+            authService.clearRefreshToken(employeeId);
+
+            // Access Token 쿠키 삭제
+            ResponseCookie deleteAccessToken = ResponseCookie.from("accessToken", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("Strict")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+
+            response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessToken.toString());
+
+            return ResponseEntity.ok("로그아웃 성공");
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그아웃 실패: " + e.getMessage());
+        }
+    }
 
     /**
      * 현재 로그인된 사용자의 정보 조회

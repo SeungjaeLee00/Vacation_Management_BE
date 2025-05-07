@@ -3,7 +3,7 @@ package com.example.vacation_reservation.entity;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.List;
+//import java.util.List;
 
 @Entity
 @Table(name = "department")
