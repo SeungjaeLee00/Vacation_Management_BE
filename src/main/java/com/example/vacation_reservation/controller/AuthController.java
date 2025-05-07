@@ -5,12 +5,14 @@
 
 package com.example.vacation_reservation.controller;
 
+import com.example.vacation_reservation.dto.ApiResponse;
 import com.example.vacation_reservation.dto.auth.LoginRequest;
 import com.example.vacation_reservation.dto.auth.ChangeNameRequestDto;
 import com.example.vacation_reservation.dto.auth.ChangePasswordRequestDto;
 import com.example.vacation_reservation.dto.auth.PasswordCheckRequest;
 import com.example.vacation_reservation.dto.user.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
+import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
@@ -45,23 +47,27 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
-        // 로그인 서비스 호출
-        Map<String, String> tokens = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
+        try {
+            // 로그인 서비스 호출
+            Map<String, String> tokens = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
 
-        // 쿠키에 JWT 토큰 설정 (Access Token)
-        Cookie accessTokenCookie = new Cookie("accessToken", tokens.get("accessToken"));
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(true);    // HTTPS 환경에서만 쿠키 전송
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(900);    // 쿠키의 유효기간 설정 (15분)
+            // 쿠키에 JWT 토큰 설정 (Access Token)
+            Cookie accessTokenCookie = new Cookie("accessToken", tokens.get("accessToken"));
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true);    // HTTPS 환경에서만 쿠키 전송
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(900);    // 쿠키의 유효기간 설정 (15분)
 
-        // 쿠키에 JWT 토큰 설정 (Refresh Token은 DB에 저장)
-        response.addCookie(accessTokenCookie);
+            // 쿠키에 JWT 토큰 설정 (Refresh Token은 DB에 저장)
+            response.addCookie(accessTokenCookie);
 
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("message", "Login successful");
-
-        return ResponseEntity.ok(responseBody);
+            return ResponseEntity.ok(new ApiResponse(true, "로그인 성공"));
+        } catch (CustomException e) {  // 이건 사용자 정의 예외임 -> 사원번호를 잘못입력한 뭐 그런
+            // 그냥 예외 던져서 GlobalExceptionHandler로 전달
+            throw e;
+        } catch (Exception e) {  // 이건 일반 예외임 -> 데이터베이스 연결 오류 같은거
+            return new ResponseEntity<>(new ApiResponse(false, "로그인 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -91,10 +97,10 @@ public class AuthController {
 
             response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessToken.toString());
 
-            return ResponseEntity.ok("로그아웃 성공");
-
+            return ResponseEntity.ok(new ApiResponse(true, "로그아웃 성공"));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("로그아웃 실패: " + e.getMessage());
+            // 예외 처리 (GlobalExceptionHandler에서 처리하도록 던짐)
+            throw new CustomException("로그아웃 실패: " + e.getMessage());
         }
     }
 
@@ -106,10 +112,21 @@ public class AuthController {
      */
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal @Valid CustomUserDetails userDetails) {
-        User user = userDetails.getUser();
-        UserResponseDto dto = new UserResponseDto(user.getEmployeeId(), user.getName(), user.getEmail());
-        return ResponseEntity.ok(dto);
+        try {
+            if (userDetails == null) {
+                throw new CustomException("사용자 정보가 없습니다. 로그인 상태를 확인해주세요.");
+            }
+            User user = userDetails.getUser();
+            UserResponseDto dto = new UserResponseDto(user.getEmployeeId(), user.getName(), user.getEmail());
+
+            return ResponseEntity.ok(dto);
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, "사용자 정보 조회 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     /**
      * 현재 로그인한 사용자의 비밀번호가 일치하는지 확인
@@ -119,25 +136,29 @@ public class AuthController {
      * @return 비밀번호 일치 여부 메시지
      */
     @PostMapping("/check-password")
-    public ResponseEntity<String> verifyPassword(
+    public ResponseEntity<?> verifyPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid PasswordCheckRequest passwordCheckRequest) {
+        try {
+            if (userDetails == null) {
+                throw new CustomException("인증된 사용자가 아닙니다.");
+            }
+            String rawPassword = passwordCheckRequest.getPassword();  // 사용자 입력 비밀번호
+            User user = userDetails.getUser();  // 실제 User 엔티티
+            boolean isPasswordValid = userService.verifyPassword(user, rawPassword);
 
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
-        }
-
-        String rawPassword = passwordCheckRequest.getPassword();  // 사용자 입력 비밀번호
-        User user = userDetails.getUser();  // 실제 User 엔티티
-
-        boolean isPasswordValid = userService.verifyPassword(user, rawPassword);
-
-        if (isPasswordValid) {
-            return ResponseEntity.ok("비밀번호가 일치합니다.");
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+            if (isPasswordValid) {
+                return ResponseEntity.ok("비밀번호가 일치합니다.");
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("비밀번호가 일치하지 않습니다.");
+            }
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, "비밀번호 확인 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * 현재 로그인한 사용자의 이름을 변경
@@ -147,17 +168,23 @@ public class AuthController {
      * @return 이름 변경 성공 메시지
      */
     @PutMapping("/update-name")
-    public ResponseEntity<String> changeName(
+    public ResponseEntity<?> changeName(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid ChangeNameRequestDto dto) {
+        try {
+            if (userDetails == null) {
+                throw new CustomException("인증된 사용자가 아닙니다.");
+            }
+            userService.updateUserName(userDetails.getUser(), dto.getNewName());
 
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
+            return ResponseEntity.ok("이름이 변경되었습니다.");
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, "이름 변경 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        userService.updateUserName(userDetails.getUser(), dto.getNewName());
-        return ResponseEntity.ok("이름이 변경되었습니다.");
     }
+
 
     /**
      * 현재 로그인한 사용자의 비밀번호를 변경
@@ -167,21 +194,23 @@ public class AuthController {
      * @return 비밀번호 변경 성공 또는 실패 메시지
      */
     @PutMapping("/change-password")
-    public ResponseEntity<String> changePassword(
+    public ResponseEntity<?> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestBody @Valid ChangePasswordRequestDto dto) {
-
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
-        }
-
         try {
+            if (userDetails == null) {
+                throw new CustomException("인증된 사용자가 아닙니다.");
+            }
             userService.changePassword(userDetails.getUser(), dto);
-            return ResponseEntity.ok("비밀번호가 변경되었습니다.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+
+            return ResponseEntity.ok(new ApiResponse(true, "비밀번호가 변경되었습니다."));
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, "비밀번호 변경 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급하는 API
@@ -189,21 +218,19 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> refreshTokenRequest) {
         String refreshToken = refreshTokenRequest.get("refreshToken");
-
-        if (refreshToken == null || refreshToken.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("리프레시 토큰이 필요합니다.");
-        }
-
         try {
-            // refresh token을 사용하여 새로운 access token을 발급
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                throw new CustomException("리프레시 토큰이 필요합니다.");
+            }
             String newAccessToken = authService.refreshAccessToken(refreshToken);
-
-            // 새로운 access token 반환
             Map<String, String> responseMap = new HashMap<>();
             responseMap.put("accessToken", newAccessToken);
+
             return ResponseEntity.ok(responseMap);
+        } catch (CustomException e) {
+            throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("리프레시 토큰이 유효하지 않거나 만료되었습니다.");
+            return new ResponseEntity<>(new ApiResponse(false, "리프레시 토큰 처리 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

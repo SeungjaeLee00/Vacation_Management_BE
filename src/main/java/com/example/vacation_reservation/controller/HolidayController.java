@@ -5,10 +5,12 @@
 
 package com.example.vacation_reservation.controller;
 
+import com.example.vacation_reservation.dto.ApiResponse;
 import com.example.vacation_reservation.dto.holiday.HolidayDTO;
 import com.example.vacation_reservation.repository.HolidayRepository;
 import com.example.vacation_reservation.service.HolidayService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,14 +33,16 @@ public class HolidayController {
      * @return 공휴일 저장 성공 메시지
      */
     @PostMapping("/fetch-all")
-    public ResponseEntity<String> fetchAllHolidays(@RequestParam int year) {
+    public ResponseEntity<?> fetchAllHolidays(@RequestParam int year) {
         try {
             holidayService.fetchAllHolidaysForYear(year);
-            return ResponseEntity.ok(year + "년 공휴일 저장 완료!");
+
+            return ResponseEntity.ok(new ApiResponse(true, year + "년 공휴일 저장 완료!"));
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("공휴일 저장 중 오류가 발생했습니다: " + e.getMessage());
+            return new ResponseEntity<>(new ApiResponse(false, "공휴일 저장 중 오류가 발생했습니다: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * 주어진 기간(시작 연도 및 월, 종료 연도 및 월)에 해당하는 공휴일 정보를 조회
@@ -50,28 +54,33 @@ public class HolidayController {
      * @return 조회된 공휴일 목록 (HolidayDTO)
      */
     @GetMapping("/get-holiday")
-    public List<HolidayDTO> getHolidays(
+    public ResponseEntity<?> getHolidays(
             @RequestParam int startYear,
             @RequestParam int startMonth,
             @RequestParam int endYear,
             @RequestParam int endMonth
     ) {
-        // 시작 날짜와 끝 날짜를 계산
-        LocalDate start = LocalDate.of(startYear, startMonth, 1);
-        LocalDate end = LocalDate.of(endYear, endMonth, 1).withDayOfMonth(LocalDate.of(endYear, endMonth, 1).lengthOfMonth());
+        try {
+            // 시작 날짜와 끝 날짜를 계산
+            LocalDate start = LocalDate.of(startYear, startMonth, 1);
+            LocalDate end = LocalDate.of(endYear, endMonth, 1).withDayOfMonth(LocalDate.of(endYear, endMonth, 1).lengthOfMonth());
 
-        // 해당 날짜 범위에 있는 공휴일을 DB에서 찾기
-        return holidayRepository.findByHolidayDateBetween(start, end)
-                .stream()
-                .map(h -> {
-                    HolidayDTO holidayDTO = new HolidayDTO();
-                    holidayDTO.setName(h.getName());
-                    holidayDTO.setHolidayDate(h.getHolidayDate().toString()); // 날짜 형식 변환
-                    return holidayDTO;
-                })
-                .collect(Collectors.toList());
+            // 해당 날짜 범위에 있는 공휴일을 DB에서 찾기
+            List<HolidayDTO> holidays = holidayRepository.findByHolidayDateBetween(start, end)
+                    .stream()
+                    .map(h -> {
+                        HolidayDTO holidayDTO = new HolidayDTO();
+                        holidayDTO.setName(h.getName());
+                        holidayDTO.setHolidayDate(h.getHolidayDate().toString()); // 날짜 형식 변환
+                        return holidayDTO;
+                    })
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(new ApiResponse(true, "공휴일 조회 완료"));
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(false, "공휴일 조회 중 오류가 발생했습니다: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
-
 }
 
 

@@ -5,14 +5,17 @@
 
 package com.example.vacation_reservation.controller;
 
+import com.example.vacation_reservation.dto.ApiResponse;
 import com.example.vacation_reservation.dto.vacation.VacationBalanceResponseDto;
 import com.example.vacation_reservation.dto.vacation.VacationRequestDto;
 import com.example.vacation_reservation.dto.vacation.VacationResponseDto;
 import com.example.vacation_reservation.entity.User;
+import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.security.CustomUserDetails;
 import com.example.vacation_reservation.service.vacation.VacationBalanceService;
 import com.example.vacation_reservation.service.vacation.VacationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -38,13 +41,20 @@ public class VacationController {
      * @return 휴가 신청 완료 메시지
      */
     @PostMapping("/request")
-    public String requestVacation(@RequestBody @Valid VacationRequestDto dto,
-                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> requestVacation(@RequestBody @Valid VacationRequestDto dto,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.getUser();
+            vacationService.requestVacation(user, dto);
 
-        User user = userDetails.getUser();
-        vacationService.requestVacation(user, dto);
-        return "휴가 신청이 완료되었습니다!";
+            return ResponseEntity.ok("휴가 신청이 완료되었습니다!");
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "휴가 신청 처리 중 오류가 발생했습니다: " + e.getMessage()));
+        }
     }
+
 
     /**
      * 사용자가 신청한 휴가 목록을 조회
@@ -54,13 +64,21 @@ public class VacationController {
      * @return 사용자 휴가 목록
      */
     @GetMapping("/my-vacations")
-    public ResponseEntity<List<VacationResponseDto>> getMyVacations(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> getMyVacations(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.getUser();
 
-        User user = userDetails.getUser();
-        List<VacationResponseDto> vacations = vacationService.getAllMyVacations(user.getEmployeeId());
-        return ResponseEntity.ok(vacations);
+            List<VacationResponseDto> vacations = vacationService.getAllMyVacations(user.getEmployeeId());
+
+            return ResponseEntity.ok(vacations);
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "휴가 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
     }
+
 
     /**
      * 사용자의 잔여 휴가를 조회
@@ -70,11 +88,18 @@ public class VacationController {
      * @return 사용자의 잔여 휴가 목록
      */
     @GetMapping("/balance")
-    public ResponseEntity<List<VacationBalanceResponseDto>> getVacationBalance(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> getVacationBalance(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            User user = userDetails.getUser();
+            List<VacationBalanceResponseDto> balances = vacationBalanceService.getVacationBalances(user.getId(), LocalDate.now().getYear());
 
-        User user = userDetails.getUser();
-        List<VacationBalanceResponseDto> balances = vacationBalanceService.getVacationBalances(user.getId(), LocalDate.now().getYear());
-        return ResponseEntity.ok(balances);
+            return ResponseEntity.ok(balances);
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "잔여 휴가 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
     }
+
 }
 
