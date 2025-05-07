@@ -66,10 +66,10 @@ public class UserController {
      */
     private String generateRandomPassword() {
         try {
-            int length = 10; // 비밀번호 길이
-            String lowerCaseSet = "abcdefghijklmnopqrstuvwxyz"; // 소문자
-            String digitSet = "0123456789"; // 숫자
-            String specialSet = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/"; // 특수문자
+            int length = 10; // 비밀번호 길이, 최소 8자임
+            String lowerCaseSet = "abcdefghijklmnopqrstuvwxyz";
+            String digitSet = "0123456789";
+            String specialSet = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/";
 
             // 모든 문자 집합을 결합하여 비밀번호 생성을 위한 문자 집합 구성
             String charSet = lowerCaseSet + digitSet + specialSet;

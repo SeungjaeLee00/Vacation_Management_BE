@@ -24,7 +24,6 @@ import java.util.List;
 public class HolidayController {
 
     private final HolidayService holidayService;  // 공휴일 디비에 저장
-    private final HolidayRepository holidayRepository;  // 데이터베이스 접근을 위한 레포
 
     /**
      * 특정 연도의 모든 공휴일 데이터를 저장
@@ -66,15 +65,7 @@ public class HolidayController {
             LocalDate end = LocalDate.of(endYear, endMonth, 1).withDayOfMonth(LocalDate.of(endYear, endMonth, 1).lengthOfMonth());
 
             // 해당 날짜 범위에 있는 공휴일을 DB에서 찾기
-            List<HolidayDTO> holidays = holidayRepository.findByHolidayDateBetween(start, end)
-                    .stream()
-                    .map(h -> {
-                        HolidayDTO holidayDTO = new HolidayDTO();
-                        holidayDTO.setName(h.getName());
-                        holidayDTO.setHolidayDate(h.getHolidayDate().toString()); // 날짜 형식 변환
-                        return holidayDTO;
-                    })
-                    .collect(Collectors.toList());
+            List<HolidayDTO> holidays = holidayService.getHolidaysBetween(start, end);
 
             return ResponseEntity.ok(holidays);
         } catch (Exception e) {

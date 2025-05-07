@@ -6,6 +6,7 @@
  */
 package com.example.vacation_reservation.service;
 
+import com.example.vacation_reservation.dto.holiday.HolidayDTO;
 import com.example.vacation_reservation.entity.Holiday;
 import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.repository.HolidayRepository;
@@ -25,6 +26,8 @@ import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -140,5 +143,21 @@ public class HolidayService {
         }
     }
 
-
+    /**
+     * 지정된 기간(start부터 end까지)에 해당하는 공휴일 목록을 조회하여 HolidayDTO 리스트로 반환.
+     *
+     * @param start 조회 시작 날짜 (포함)
+     * @param end   조회 종료 날짜 (포함)
+     * @return 조회된 공휴일 정보를 담은 HolidayDTO 리스트
+     */
+    public List<HolidayDTO> getHolidaysBetween(LocalDate start, LocalDate end) {
+        return holidayRepository.findByHolidayDateBetween(start, end).stream()
+                .map(h -> {
+                    HolidayDTO dto = new HolidayDTO();
+                    dto.setName(h.getName());
+                    dto.setHolidayDate(h.getHolidayDate().toString());
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 }
