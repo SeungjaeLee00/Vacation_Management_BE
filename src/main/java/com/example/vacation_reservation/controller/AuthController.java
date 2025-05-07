@@ -15,7 +15,6 @@ import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
 import com.example.vacation_reservation.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +44,7 @@ public class AuthController {
      * @return 로그인 성공 메시지
      */
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+    public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
         // 로그인 서비스 호출
         Map<String, String> tokens = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
 
@@ -69,12 +67,12 @@ public class AuthController {
     /**
      * 로그아웃 요청 처리
      * 서버에서 Access Token 쿠키 삭제, Refresh Token null 처리
-     * @param userDetails
+     * @param userDetails 인증된 사용자 정보
      * @param response
      * @return
      */
     @PostMapping("/logout")
-    public ResponseEntity<?> logout( @AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
+    public ResponseEntity<?> logout(@AuthenticationPrincipal CustomUserDetails userDetails, HttpServletResponse response) {
         try {
             // 현재 로그인한 사용자 사번(employeeId) 추출
             String employeeId = userDetails.getUser().getEmployeeId();
@@ -107,7 +105,7 @@ public class AuthController {
      * @return 사용자 정보 DTO (사원번호, 이름, 이메일)
      */
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal @Valid CustomUserDetails userDetails) {
         User user = userDetails.getUser();
         UserResponseDto dto = new UserResponseDto(user.getEmployeeId(), user.getName(), user.getEmail());
         return ResponseEntity.ok(dto);
@@ -123,7 +121,7 @@ public class AuthController {
     @PostMapping("/check-password")
     public ResponseEntity<String> verifyPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody PasswordCheckRequest passwordCheckRequest) {
+            @RequestBody @Valid PasswordCheckRequest passwordCheckRequest) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
@@ -151,7 +149,7 @@ public class AuthController {
     @PutMapping("/update-name")
     public ResponseEntity<String> changeName(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ChangeNameRequestDto dto) {
+            @RequestBody @Valid ChangeNameRequestDto dto) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");
@@ -171,7 +169,7 @@ public class AuthController {
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody ChangePasswordRequestDto dto) {
+            @RequestBody @Valid ChangePasswordRequestDto dto) {
 
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증된 사용자가 아닙니다.");

@@ -75,13 +75,15 @@ public class VacationService {
         }
 
         // 휴가 신청 정보 저장
-        Vacation vacation = new Vacation();
-        vacation.setUser(user);
-        vacation.setStartAt(dto.getStartAt());
-        vacation.setEndAt(dto.getEndAt());
-        vacation.setReason(dto.getReason());
-        vacation.setRequestDate(LocalDate.now());
-        vacation.setStatus("Pending");
+        Vacation vacation = new Vacation(
+                user,
+                dto.getStartAt(),
+                dto.getEndAt(),
+                dto.getReason(),
+                LocalDate.now(),
+                "Pending"
+        );
+
 
         // 사용 휴가 목록 구성
         List<VacationUsed> usedVacations = dto.getUsedVacations().stream().map(usedDto -> {

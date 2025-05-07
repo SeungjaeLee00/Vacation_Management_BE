@@ -52,4 +52,14 @@ public class Vacation {
 
     @Column(name = "updated_at", nullable = false)  // 생성할 때 같이 넣어주세요
     private LocalDateTime updatedAt;
+
+    public Vacation(User user, LocalDate startAt, LocalDate endAt, String reason, LocalDate RequestDate, String status) {
+        this.user = user;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.reason = reason;
+        this.RequestDate = RequestDate;
+        this.status = status;
+    }
+
 }

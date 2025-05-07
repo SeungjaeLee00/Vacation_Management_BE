@@ -63,10 +63,12 @@ public class HolidayController {
         // 해당 날짜 범위에 있는 공휴일을 DB에서 찾기
         return holidayRepository.findByHolidayDateBetween(start, end)
                 .stream()
-                .map(h -> new HolidayDTO(
-                        h.getName(),
-                        h.getHolidayDate().toString()  // 날짜 형식 변환
-                ))
+                .map(h -> {
+                    HolidayDTO holidayDTO = new HolidayDTO();
+                    holidayDTO.setName(h.getName());
+                    holidayDTO.setHolidayDate(h.getHolidayDate().toString()); // 날짜 형식 변환
+                    return holidayDTO;
+                })
                 .collect(Collectors.toList());
     }
 

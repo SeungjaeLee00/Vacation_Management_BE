@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -26,7 +27,6 @@ import java.util.List;
 public class VacationController {
 
     private final VacationService vacationService;
-
     private final VacationBalanceService vacationBalanceService;
 
     /**
@@ -38,7 +38,7 @@ public class VacationController {
      * @return 휴가 신청 완료 메시지
      */
     @PostMapping("/request")
-    public String requestVacation(@RequestBody VacationRequestDto dto,
+    public String requestVacation(@RequestBody @Valid VacationRequestDto dto,
                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         User user = userDetails.getUser();

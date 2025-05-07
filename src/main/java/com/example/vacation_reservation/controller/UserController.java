@@ -10,6 +10,8 @@ import com.example.vacation_reservation.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
@@ -27,7 +29,7 @@ public class UserController {
      * @return 임시 비밀번호가 이메일로 발송되었다는 메시지
      */
     @PostMapping("/forgot-password")
-    public String forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public String forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         // 이메일로 사용자 찾기
         System.out.println("ForgotPassword 요청 이메일: '" + request.getEmail() + "'");
         User user = userService.findUserByEmail(request.getEmail());

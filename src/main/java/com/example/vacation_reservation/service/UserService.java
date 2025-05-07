@@ -4,11 +4,9 @@
 package com.example.vacation_reservation.service;
 
 import com.example.vacation_reservation.dto.auth.ChangePasswordRequestDto;
-import com.example.vacation_reservation.dto.user.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,16 +16,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    /**
-     * 현재 로그인된 사용자의 정보를 반환.
-     *
-     * @param user 현재 인증된 사용자
-     * @return 사용자 응답 DTO
-     */
-    public UserResponseDto getCurrentUser(User user) {
-        return new UserResponseDto(user.getEmployeeId(), user.getName(), user.getEmail());
-    }
 
     /**
      * 비밀번호가 일치하는지 확인.
