@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Random;
 
 @RestController
 @RequiredArgsConstructor
@@ -59,26 +60,55 @@ public class UserController {
 
 
     /**
-     * 랜덤한 임시 비밀번호를 생성하는 메서드
+     * 랜덤한 임시 비밀번호를 생성하는 메서드 (비밀번호 규칙: 알파벳 소문자 + 숫자 + 특수문자, 최소 8자)
      *
      * @return 생성된 임시 비밀번호
      */
     private String generateRandomPassword() {
         try {
-            int length = 10;
-            String charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            StringBuilder password = new StringBuilder();
+            int length = 10; // 비밀번호 길이
+            String lowerCaseSet = "abcdefghijklmnopqrstuvwxyz"; // 소문자
+            String digitSet = "0123456789"; // 숫자
+            String specialSet = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/"; // 특수문자
 
-            for (int i = 0; i < length; i++) {
-                int randomIndex = (int) (Math.random() * charSet.length());
-                password.append(charSet.charAt(randomIndex));
+            // 모든 문자 집합을 결합하여 비밀번호 생성을 위한 문자 집합 구성
+            String charSet = lowerCaseSet + digitSet + specialSet;
+
+            StringBuilder password = new StringBuilder();
+            Random random = new Random();
+
+            // 최소 한 개의 소문자, 숫자, 특수문자를 포함하도록 보장
+            password.append(lowerCaseSet.charAt(random.nextInt(lowerCaseSet.length())));
+            password.append(digitSet.charAt(random.nextInt(digitSet.length())));
+            password.append(specialSet.charAt(random.nextInt(specialSet.length())));
+
+            // 나머지 문자는 임의로 선택하여 추가
+            for (int i = 4; i < length; i++) {
+                password.append(charSet.charAt(random.nextInt(charSet.length())));
             }
 
-            return password.toString();
+            // 비밀번호의 순서를 섞어서 반환
+            return shuffleString(password.toString());
         } catch (Exception e) {
             throw new CustomException("임시 비밀번호 생성 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 
-
+    /**
+     * 문자열의 순서를 섞는 메서드
+     *
+     * @param str 문자열
+     * @return 섞인 문자열
+     */
+    private String shuffleString(String str) {
+        StringBuilder shuffled = new StringBuilder(str);
+        Random random = new Random();
+        for (int i = 0; i < shuffled.length(); i++) {
+            int j = random.nextInt(shuffled.length());
+            char temp = shuffled.charAt(i);
+            shuffled.setCharAt(i, shuffled.charAt(j));
+            shuffled.setCharAt(j, temp);
+        }
+        return shuffled.toString();
+    }
 }

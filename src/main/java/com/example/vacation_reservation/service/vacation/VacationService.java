@@ -12,6 +12,7 @@ import com.example.vacation_reservation.entity.vacation.Vacation;
 import com.example.vacation_reservation.entity.vacation.VacationType;
 import com.example.vacation_reservation.entity.vacation.VacationUsed;
 import com.example.vacation_reservation.exception.CustomException;
+import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.repository.vacation.VacationRepository;
 import com.example.vacation_reservation.repository.vacation.VacationTypeRepository;
 
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VacationService {
 
+    private final UserRepository userRepository;
     private final VacationRepository vacationRepository;
     private final VacationTypeRepository vacationTypeRepository;
     private final VacationBalanceService vacationBalanceService;
@@ -60,7 +62,7 @@ public class VacationService {
         // 각 휴가 종류별 잔여 일수 확인 및 차감
         for (VacationUsedDto usedDto : dto.getUsedVacations()) {
             VacationType vacationType = vacationTypeRepository.findByName(usedDto.getVacationTypeName())
-                    .orElseThrow(() -> new RuntimeException("휴가 종류를 찾을 수 없습니다: " + usedDto.getVacationTypeName()));
+                    .orElseThrow(() -> new CustomException("휴가 종류를 찾을 수 없습니다: " + usedDto.getVacationTypeName()));
 
             String vacationBalanceMessage = vacationBalanceService.checkAndUseVacation(
                     user.getId(),
@@ -91,7 +93,7 @@ public class VacationService {
             vu.setVacation(vacation);
 
             VacationType vt = vacationTypeRepository.findByName(usedDto.getVacationTypeName())
-                    .orElseThrow(() -> new RuntimeException("휴가 종류를 찾을 수 없습니다: " + usedDto.getVacationTypeName()));
+                    .orElseThrow(() -> new CustomException("휴가 종류를 찾을 수 없습니다: " + usedDto.getVacationTypeName()));
             vu.setVacationType(vt);
 
             vu.setUsedDays(usedDto.getUsedDays());
@@ -111,9 +113,17 @@ public class VacationService {
      *
      * @param employeeId 사원번호
      * @return 휴가 응답 DTO 리스트
+     * @throws CustomException 사용자가 존재하지 않거나, 휴가 내역이 없을 경우
      */
     public List<VacationResponseDto> getAllMyVacations(String employeeId) {
+        User user = userRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new CustomException("해당 사원번호에 해당하는 사용자가 존재하지 않습니다."));
+
         List<Vacation> vacations = vacationRepository.findByUser_EmployeeId(employeeId);
+
+        if (vacations.isEmpty()) {
+            throw new CustomException("해당 사용자의 휴가 내역이 존재하지 않습니다.");
+        }
 
         return vacations.stream().map(vacation -> {
             List<VacationUsedDto> usedVacations = new ArrayList<>();

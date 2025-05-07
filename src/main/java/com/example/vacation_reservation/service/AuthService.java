@@ -5,6 +5,7 @@
 package com.example.vacation_reservation.service;
 
 import com.example.vacation_reservation.entity.User;
+import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -37,16 +38,15 @@ public class AuthService {
      * @param employeeId 로그인하려는 사용자의 사번
      * @param password   사용자가 입력한 비밀번호
      * @return JWT 토큰 문자열
-     * @throws RuntimeException 사번에 해당하는 사용자가 없거나 비밀번호가 틀린 경우 예외 발생
+     * @throws CustomException 사번에 해당하는 사용자가 없거나 비밀번호가 틀린 경우 예외 발생
      */
-    public Map<String, String> login(String employeeId, String password)
-    {
+    public Map<String, String> login(String employeeId, String password) {
         User user = userRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new RuntimeException("해당 사번을 가진 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new CustomException("아이디 또는 비밀번호가 일치하지 않습니다."));  // 사실은 사번이긴 함
 
         // 비밀번호 확인
         if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new RuntimeException("비밀번호가 올바르지 않습니다.");
+            throw new CustomException("비밀번호가 올바르지 않습니다.");
         }
 
         // 로그인 성공 시 JWT 토큰 생성
@@ -65,31 +65,48 @@ public class AuthService {
         return tokens;
     }
 
+
     /**
      * Refresh Token을 이용해 새로운 Access Token 발급
+     *
+     * @param refreshToken 클라이언트로부터 전달받은 Refresh Token
+     * @return 새로운 Access Token
+     * @throws CustomException Refresh Token이 유효하지 않거나 만료된 경우
      */
     public String refreshAccessToken(String refreshToken) {
         // Refresh Token 검증
         if (!jwtTokenProvider.validateToken(refreshToken)) {
-            throw new RuntimeException("리프레시 토큰이 유효하지 않거나 만료되었습니다.");
+            throw new CustomException("리프레시 토큰이 유효하지 않거나 만료되었습니다.");
         }
 
         // Refresh Token에서 사용자 정보 추출
-        String employeeId = jwtTokenProvider.getEmployeeIdFromToken(refreshToken);
+        String employeeId;
+        try {
+            employeeId = jwtTokenProvider.getEmployeeIdFromToken(refreshToken);
+        } catch (Exception e) {
+            throw new CustomException("토큰에서 사용자 정보를 추출할 수 없습니다.");
+        }
 
         // 새로운 Access Token 발급
         return jwtTokenProvider.generateAccessToken(employeeId);
     }
 
+
     /**
      * Refresh Token 삭제
-     * @param employeeId
+     *
+     * @param employeeId 사원번호
+     * @throws CustomException 사용자가 존재하지 않거나 토큰 삭제 실패 시 예외 발생
      */
     public void clearRefreshToken(String employeeId) {
-        userRepository.findByEmployeeId(employeeId).ifPresent(user -> {
+        User user = userRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new CustomException("해당 사번을 가진 사용자가 존재하지 않습니다."));
+
+        try {
             user.setRefreshToken(null);
             userRepository.save(user);
-        });
+        } catch (Exception e) {
+            throw new CustomException("Refresh Token 삭제 중 오류가 발생했습니다.");
+        }
     }
-
 }

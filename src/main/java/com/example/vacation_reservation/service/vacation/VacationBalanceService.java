@@ -5,6 +5,7 @@ package com.example.vacation_reservation.service.vacation;
 
 import com.example.vacation_reservation.dto.vacation.VacationBalanceResponseDto;
 import com.example.vacation_reservation.entity.vacation.VacationBalance;
+import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.repository.vacation.VacationBalanceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -33,12 +34,12 @@ public class VacationBalanceService {
         // 잔여 휴가 확인
         VacationBalance balance = getVacationBalance(userId, vacationTypeId, year);
         if (balance == null) {
-            return "잔여 휴가가 없습니다.";
+            throw new CustomException("잔여 휴가 정보가 없습니다.");
         }
 
         // 충분한 잔여일수 확인
         if (!hasEnoughRemainingDays(balance, days)) {
-            return "남은 휴가 일수가 부족합니다.";
+            throw new CustomException("남은 휴가 일수가 부족합니다.");
         }
 
         // 휴가 사용 처리
@@ -58,10 +59,14 @@ public class VacationBalanceService {
         List<VacationBalance> balances = vacationBalanceRepository.findByUserIdAndYear(userId, year);
 
         if (balances.isEmpty()) {
-            return new ArrayList<VacationBalanceResponseDto>() {{
-                add(new VacationBalanceResponseDto("잔여 휴가가 없습니다", 0));
-            }};
+            throw new CustomException("잔여 휴가가 없습니다.");
         }
+
+//        if (balances.isEmpty()) {
+//            return new ArrayList<VacationBalanceResponseDto>() {{
+//                add(new VacationBalanceResponseDto("잔여 휴가가 없습니다", 0));
+//            }};
+//        }
 
         return balances.stream()
                 .map(balance -> new VacationBalanceResponseDto(
@@ -79,7 +84,7 @@ public class VacationBalanceService {
      */
     private VacationBalance getVacationBalance(Long userId, Long vacationTypeId, int year) {
         return vacationBalanceRepository.findByUserIdAndVacationTypeIdAndYear(userId, vacationTypeId, year)
-                .orElse(null);
+                .orElseThrow(() -> new CustomException("해당 사용자의 잔여 휴가 정보가 없습니다."));
     }
 
     /**

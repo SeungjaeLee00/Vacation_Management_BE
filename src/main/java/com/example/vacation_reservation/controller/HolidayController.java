@@ -76,7 +76,7 @@ public class HolidayController {
                     })
                     .collect(Collectors.toList());
 
-            return ResponseEntity.ok(new ApiResponse(true, "공휴일 조회 완료"));
+            return ResponseEntity.ok(holidays);
         } catch (Exception e) {
             return new ResponseEntity<>(new ApiResponse(false, "공휴일 조회 중 오류가 발생했습니다: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }

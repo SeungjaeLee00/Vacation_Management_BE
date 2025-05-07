@@ -5,6 +5,7 @@
 package com.example.vacation_reservation.service;
 
 import com.example.vacation_reservation.entity.User;
+import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,18 @@ public class CustomUserDetailsService implements UserDetailsService {
      *
      * @param employeeId 인증에 사용할 사원번호
      * @return 사용자 정보를 담은 {@link CustomUserDetails} 객체
-     * @throws UsernameNotFoundException 해당 사번에 해당하는 사용자가 존재하지 않는 경우 예외 발생
+     * @throws CustomException 해당 사번에 해당하는 사용자가 존재하지 않는 경우 예외 발생
      */
     @Override
-    public UserDetails loadUserByUsername(String employeeId) throws UsernameNotFoundException {
-        User user = userRepository.findByEmployeeId(employeeId)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 사원번호의 사용자가 없습니다."));
-        return new CustomUserDetails(user);
+    public UserDetails loadUserByUsername(String employeeId) {
+        try {
+            User user = userRepository.findByEmployeeId(employeeId)
+                    .orElseThrow(() -> new CustomException("해당 사원번호의 사용자가 없습니다."));
+
+            return new CustomUserDetails(user);
+        } catch (CustomException e) {
+            throw new CustomException("사용자를 찾을 수 없습니다: " + e.getMessage());
+        }
     }
 }
 
