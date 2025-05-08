@@ -9,9 +9,7 @@ import com.example.vacation_reservation.dto.vacation.VacationRequestDto;
 import com.example.vacation_reservation.dto.vacation.VacationResponseDto;
 import com.example.vacation_reservation.dto.vacation.VacationUsedDto;
 import com.example.vacation_reservation.entity.*;
-import com.example.vacation_reservation.entity.vacation.Vacation;
-import com.example.vacation_reservation.entity.vacation.VacationType;
-import com.example.vacation_reservation.entity.vacation.VacationUsed;
+import com.example.vacation_reservation.entity.vacation.*;
 import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.mapper.VacationMapper;
 import com.example.vacation_reservation.repository.UserRepository;
@@ -87,7 +85,7 @@ public class VacationService {
                 dto.getEndAt(),
                 dto.getReason(),
                 LocalDate.now(),
-                "Pending"
+                VacationStatus.PENDING
         );
 
 

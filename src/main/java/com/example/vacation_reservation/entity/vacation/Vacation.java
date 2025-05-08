@@ -38,8 +38,9 @@ public class Vacation {
     @Column(nullable = false)
     private String reason;
 
-    @Column(nullable = false, length = 10)
-    private String status = "PENDING";
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private VacationStatus status;
 
     @Column(name = "start_at", nullable = false)
     private LocalDate startAt;
@@ -53,7 +54,7 @@ public class Vacation {
     @Column(name = "updated_at", nullable = false)  // 생성할 때 같이 넣어주세요
     private LocalDateTime updatedAt;
 
-    public Vacation(User user, LocalDate startAt, LocalDate endAt, String reason, LocalDate RequestDate, String status) {
+    public Vacation(User user, LocalDate startAt, LocalDate endAt, String reason, LocalDate RequestDate, VacationStatus status) {
         this.user = user;
         this.startAt = startAt;
         this.endAt = endAt;
