@@ -158,10 +158,18 @@ public class VacationController {
         try {
             List<VacationInfoDto> list = vacationService.getVacationsInMyDepartment(userDetails.getUser());
 
-            return ResponseEntity.ok(list);
+            // 부서 내에 휴가자가 없다면 빈 리스트 반환
+            if (list.isEmpty()) {
+                return ResponseEntity.ok(new ApiResponse(true, "부서 내 휴가자 없음", list));
+            }
+
+            return ResponseEntity.ok(new ApiResponse(true, "부서 휴가 목록 조회 성공", list));
         } catch (CustomException e) {
-            throw e;
+            // 사용자 관련 예외 처리
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse(false, e.getMessage()));
         } catch (Exception e) {
+            // 일반 예외 처리
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(new ApiResponse(false, "부서 휴가 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }

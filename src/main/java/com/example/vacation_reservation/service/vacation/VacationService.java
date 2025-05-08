@@ -175,9 +175,9 @@ public class VacationService {
         // MyBatis로 해당 부서 사람들의 휴가 목록 조회
         List<VacationInfoDto> vacations = vacationMapper.findVacationsByDepartmentId(departmentId);
 
-        // 부서 내에 휴가자가 없으면 예외 처리
+        // 부서 내에 휴가자가 없으면 빈 리스트
         if (vacations.isEmpty()) {
-            throw new CustomException("부서 내에 휴가자가 없습니다.");
+            return new ArrayList<>();
         }
 
         return vacations;
@@ -244,6 +244,7 @@ public class VacationService {
 //
 //        rollbackVacationBalance(vacation);
 //    }
+
 
     /**
      * 휴가가 취소되거나 반려된 경우, 해당 휴가의 사용된 일수를 롤백하여 휴가 잔여 일수를 복원하는 메서드
