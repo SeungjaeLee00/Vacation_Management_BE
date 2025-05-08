@@ -52,21 +52,15 @@ public class VacationBalanceService {
      * 특정 사용자에 대한 특정 연도의 휴가 잔여 일수를 조회
      * @param userId 사용자 ID
      * @param year   연도
-     * @return 휴가 잔여일수 목록 (없을 경우 "잔여 휴가가 없습니다" 메시지를 포함한 리스트 반환)
+     * @return 휴가 잔여일수 목록 (없을 경우 빈리스트 반환)
      */
     @Transactional(readOnly = true)
     public List<VacationBalanceResponseDto> getVacationBalances(Long userId, int year) {
         List<VacationBalance> balances = vacationBalanceRepository.findByUserIdAndYear(userId, year);
 
         if (balances.isEmpty()) {
-            throw new CustomException("잔여 휴가가 없습니다.");
+            return new ArrayList<>();
         }
-
-//        if (balances.isEmpty()) {
-//            return new ArrayList<VacationBalanceResponseDto>() {{
-//                add(new VacationBalanceResponseDto("잔여 휴가가 없습니다", 0));
-//            }};
-//        }
 
         return balances.stream()
                 .map(balance -> new VacationBalanceResponseDto(

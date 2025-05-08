@@ -7,6 +7,7 @@ package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.ApiResponse;
 import com.example.vacation_reservation.dto.vacation.VacationBalanceResponseDto;
+import com.example.vacation_reservation.dto.vacation.VacationInfoDto;
 import com.example.vacation_reservation.dto.vacation.VacationRequestDto;
 import com.example.vacation_reservation.dto.vacation.VacationResponseDto;
 import com.example.vacation_reservation.entity.User;
@@ -74,7 +75,6 @@ public class VacationController {
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "휴가 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
@@ -97,9 +97,36 @@ public class VacationController {
         } catch (CustomException e) {
             throw e;
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "잔여 휴가 조회 중 오류가 발생했습니다: " + e.getMessage()));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "잔여 휴가 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
+
+    /**
+     * 내 부서 사용자들의 휴가 목록을 조회.
+     *
+     * 로그인한 사용자의 부서를 기준으로, 해당 부서에 속한 모든 직원의 휴가 정보를 조회.
+     * 휴가 정보는 MyBatis를 통해 가져오며, 사용자 이름, 직급, 휴가 종류, 시작일, 종료일을 포함.
+     *
+     * @param userDetails 인증된 사용자 정보
+     * @return 부서 구성원의 휴가 목록 (List<VacationInfoDto>) 또는 오류 응답
+     */
+    @GetMapping("/my-department")
+    public ResponseEntity<?> getMyDepartmentVacations(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        try {
+            List<VacationInfoDto> list = vacationService.getVacationsInMyDepartment(userDetails.getUser());
+
+            return ResponseEntity.ok(list);
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "부서 휴가 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+
 
 }
 

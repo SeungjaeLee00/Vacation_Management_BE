@@ -4,6 +4,7 @@
 
 package com.example.vacation_reservation.service.vacation;
 
+import com.example.vacation_reservation.dto.vacation.VacationInfoDto;
 import com.example.vacation_reservation.dto.vacation.VacationRequestDto;
 import com.example.vacation_reservation.dto.vacation.VacationResponseDto;
 import com.example.vacation_reservation.dto.vacation.VacationUsedDto;
@@ -12,6 +13,7 @@ import com.example.vacation_reservation.entity.vacation.Vacation;
 import com.example.vacation_reservation.entity.vacation.VacationType;
 import com.example.vacation_reservation.entity.vacation.VacationUsed;
 import com.example.vacation_reservation.exception.CustomException;
+import com.example.vacation_reservation.mapper.VacationMapper;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.repository.vacation.VacationRepository;
 import com.example.vacation_reservation.repository.vacation.VacationTypeRepository;
@@ -33,6 +35,8 @@ public class VacationService {
     private final VacationRepository vacationRepository;
     private final VacationTypeRepository vacationTypeRepository;
     private final VacationBalanceService vacationBalanceService;
+
+    private final VacationMapper vacationMapper;
 
     /**
      * 사용자의 휴가 신청을 처리
@@ -122,7 +126,7 @@ public class VacationService {
         List<Vacation> vacations = vacationRepository.findByUser_EmployeeId(employeeId);
 
         if (vacations.isEmpty()) {
-            throw new CustomException("해당 사용자의 휴가 내역이 존재하지 않습니다.");
+            return new ArrayList<>();
         }
 
         return vacations.stream().map(vacation -> {
@@ -148,5 +152,33 @@ public class VacationService {
                     usedVacations
             );
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * 사용자의 부서에 속한 모든 구성원의 휴가 목록을 조회
+     *
+     * 먼저, 전달된 사용자 객체에서 부서 ID를 조회하고
+     * 해당 부서에 속한 사람들의 휴가 목록을 MyBatis를 사용하여 가져옴
+     *
+     * @param user 부서 휴가 목록을 조회할 사용자의 정보
+     * @return 해당 부서에 속한 사용자들의 휴가 목록 (List<VacationInfoDto>)
+     * @throws CustomException  사용자를 찾을 수 없을 때 발생
+     */
+    public List<VacationInfoDto> getVacationsInMyDepartment(User user) {
+        // 사용자의 부서 ID 가져오기 (JPA로)
+        Long departmentId = userRepository.findById(user.getId())
+                .orElseThrow(() -> new CustomException ("사용자를 찾을 수 없습니다."))
+                .getDepartment()
+                .getId();
+
+        // MyBatis로 해당 부서 사람들의 휴가 목록 조회
+        List<VacationInfoDto> vacations = vacationMapper.findVacationsByDepartmentId(departmentId);
+
+        // 부서 내에 휴가자가 없으면 예외 처리
+        if (vacations.isEmpty()) {
+            throw new CustomException("부서 내에 휴가자가 없습니다.");
+        }
+
+        return vacations;
     }
 }
