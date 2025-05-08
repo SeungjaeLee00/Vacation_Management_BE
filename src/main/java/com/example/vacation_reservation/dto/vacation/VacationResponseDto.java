@@ -6,9 +6,6 @@ import com.example.vacation_reservation.entity.vacation.VacationStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -33,17 +30,4 @@ public class VacationResponseDto {
         this.endAt = endAt;
         this.usedVacations = usedVacations;
     }
-
-//    @Override
-//    public String toString() {
-//        return "VacationResponseDto{" +
-//                "id=" + id +
-//                ", requestDate='" + requestDate + '\'' +
-//                ", status='" + status + '\'' +
-//                ", reason='" + reason + '\'' +
-//                ", startAt='" + startAt + '\'' +
-//                ", endAt='" + endAt + '\'' +
-//                ", usedVacations='" + usedVacations + '\'' +
-//                '}';
-//    }
 }

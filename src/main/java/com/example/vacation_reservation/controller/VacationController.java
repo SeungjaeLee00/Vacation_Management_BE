@@ -102,6 +102,47 @@ public class VacationController {
         }
     }
 
+
+    /**
+     * 대기 중인 휴가를 취소하는 API.
+     *
+     * @param vacationId 휴가 ID
+     * @return 취소 완료 메시지
+     */
+    @DeleteMapping("/{vacationId}/cancel")
+    public ResponseEntity<ApiResponse> cancelPendingVacation(@PathVariable Long vacationId) {
+        try {
+            vacationService.cancelVacation(vacationId);
+            return ResponseEntity.ok(new ApiResponse(true, "휴가 신청이 취소되었습니다."));
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            // 다른 예외가 발생한 경우
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "휴가 취소 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * 취소 상태인 휴가 삭제
+     *
+     * @param vacationId 휴가 ID
+     * @return 삭제 완료 메시지
+     */
+    @DeleteMapping("/{vacationId}/delete")
+    public ResponseEntity<ApiResponse> deleteVacation(@PathVariable Long vacationId) {
+        try {
+            vacationService.deleteVacation(vacationId);
+            return ResponseEntity.ok(new ApiResponse(true, "휴가 신청이 삭제되었습니다."));
+        } catch (CustomException e) {
+            throw e;
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "휴가 삭제 중 오류가 발생했습니다: " + e.getMessage()));
+        }
+    }
+
+
     /**
      * 내 부서 사용자들의 휴가 목록을 조회.
      *
@@ -125,8 +166,5 @@ public class VacationController {
                     .body(new ApiResponse(false, "부서 휴가 목록 조회 중 오류가 발생했습니다: " + e.getMessage()));
         }
     }
-
-
-
 }
 

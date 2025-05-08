@@ -13,6 +13,7 @@ import com.example.vacation_reservation.entity.vacation.*;
 import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.mapper.VacationMapper;
 import com.example.vacation_reservation.repository.UserRepository;
+import com.example.vacation_reservation.repository.vacation.VacationBalanceRepository;
 import com.example.vacation_reservation.repository.vacation.VacationRepository;
 import com.example.vacation_reservation.repository.vacation.VacationTypeRepository;
 
@@ -29,10 +30,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VacationService {
 
+    private final VacationBalanceService vacationBalanceService;
+
     private final UserRepository userRepository;
     private final VacationRepository vacationRepository;
     private final VacationTypeRepository vacationTypeRepository;
-    private final VacationBalanceService vacationBalanceService;
+    private final VacationBalanceRepository vacationBalanceRepository;
 
     private final VacationMapper vacationMapper;
 
@@ -179,4 +182,99 @@ public class VacationService {
 
         return vacations;
     }
+
+    /**
+     * 사용자가 대기 중인 휴가를 취소할 수 있는 메서드
+     *
+     * <p>휴가 신청이 '대기 중(PENDING)' 상태일 때만 취소가 가능, 취소 시 상태를 'CANCELLED'로 변경하고
+     * 해당 휴가에 사용된 일수를 복원하여 잔여 휴가 일수를 롤백함.</p>
+     *
+     * @param vacationId 휴가 ID
+     * @throws CustomException 휴가가 존재하지 않거나 대기 중이 아닌 상태일 경우 예외가 발생.
+     */
+    @Transactional
+    public void cancelVacation(Long vacationId) {
+        Vacation vacation = vacationRepository.findById(vacationId)
+                .orElseThrow(() -> new CustomException("휴가 신청이 존재하지 않습니다."));
+
+        if (!vacation.getStatus().equals(VacationStatus.PENDING)) {
+            throw new CustomException("대기 중인 휴가만 취소할 수 있습니다.");
+        }
+
+        // 상태를 CANCELLED로 변경
+        vacation.setStatus(VacationStatus.CANCELLED);
+        vacationRepository.save(vacation);
+
+        rollbackVacationBalance(vacation);
+    }
+
+
+    /**
+     * 사용자가 취소한 휴가를 삭제할 수 있는 메서드
+     *
+     * @param vacationId 휴가 ID
+     * @throws CustomException 취소 상태가 아닐 때 예외가 발생.
+     */
+    @Transactional
+    public void deleteVacation(Long vacationId) throws CustomException {
+        Vacation vacation = vacationRepository.findById(vacationId)
+                .orElseThrow(() -> new CustomException("휴가 내역을 찾을 수 없습니다."));
+
+        if (vacation.getStatus() == VacationStatus.CANCELLED) {
+            vacationRepository.delete(vacation);
+        } else {
+            throw new CustomException("취소한 휴가만 삭제할 수 있습니다.");
+        }
+    }
+
+//    /**
+//     * 관리자가 REJECTED로 상태를 변경한 경우, 해당 휴가 일수 롤백
+//     */
+//    @Transactional
+//    public void rejectVacation(Long vacationId) {
+//        Vacation vacation = vacationRepository.findById(vacationId)
+//                .orElseThrow(() -> new CustomException("휴가 신청이 존재하지 않습니다."));
+//
+//        if (!vacation.getStatus().equals(VacationStatus.REJECTED)) {
+//            return; // 반려된 경우가 아니면 아무것도 하지 않음
+//        }
+//
+//        vacation.setStatus(VacationStatus.REJECTED);
+//        vacationRepository.save(vacation);
+//
+//        rollbackVacationBalance(vacation);
+//    }
+
+    /**
+     * 휴가가 취소되거나 반려된 경우, 해당 휴가의 사용된 일수를 롤백하여 휴가 잔여 일수를 복원하는 메서드
+     *
+     * <p>휴가 신청에 사용된 모든 휴가 타입별로, 해당 연도에 대한 휴가 잔여 정보를 조회하여 사용된 일수를 차감하고,
+     * 잔여 일수 추가, 휴가 일수 복원</p>
+     *
+     * @param vacation 롤백할 휴가 객체
+     * @throws CustomException 휴가 잔여 정보가 없을 경우 예외가 발생
+     */
+    private void rollbackVacationBalance(Vacation vacation) {
+        int startYear = vacation.getStartAt().getYear();  // 시작 연도
+        int endYear = vacation.getEndAt() != null ? vacation.getEndAt().getYear() : startYear; // 종료 연도 (nullable을 고려)
+
+        // 시작 연도와 종료 연도를 기준으로 각각 롤백 처리
+        for (int year = startYear; year <= endYear; year++) {
+            for (VacationUsed used : vacation.getUsedVacations()) {
+                VacationBalance balance = vacationBalanceRepository.findByUserIdAndVacationTypeIdAndYear(
+                        vacation.getUser().getId(),
+                        used.getVacationType().getId(),
+                        year
+                ).orElseThrow(() -> new CustomException("잔여 휴가 정보를 찾을 수 없습니다."));
+
+                // 롤백: 사용된 일수 차감, 남은 일수 증가
+                balance.setUsedDays(balance.getUsedDays() - used.getUsedDays());
+                balance.setRemainingDays(balance.getRemainingDays() + used.getUsedDays());
+
+                // 휴가 잔여 정보 저장
+                vacationBalanceRepository.save(balance);
+            }
+        }
+    }
+
 }
