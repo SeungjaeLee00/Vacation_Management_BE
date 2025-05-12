@@ -221,7 +221,7 @@ public class VacationService {
                 .orElseThrow(() -> new CustomException("휴가 내역을 찾을 수 없습니다."));
 
         if (vacation.getStatus() == VacationStatus.CANCELLED) {
-            vacationRepository.delete(vacation);
+            vacation.setStatus(VacationStatus.DELETED);
         } else {
             throw new CustomException("취소한 휴가만 삭제할 수 있습니다.");
         }
