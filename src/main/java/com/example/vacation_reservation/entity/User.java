@@ -52,11 +52,12 @@ public class User {
     @JoinColumn(name = "position_id")
     private Position position;
 
-    public User(String employeeId, String name, String email, String password, Role role) {
+    public User(String employeeId, String name, String email, String password, Role role, Position position) {
         this.employeeId = employeeId;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.position = position;
     }
 }

@@ -51,13 +51,10 @@ public class SecurityConfig {
                 .and()
                 .authorizeRequests()
                 .antMatchers(
-                        "/api/users/register",
-                        "/api/users/send-verification-code",
-                        "/api/users/verify-code",
-                        "/api/user/login",
-                        "/api/user/forgot-password",
+                        "/api/auth/login",
+                        "/api/auth/forgot-password",
                         "/api/holidays/**"
-                ).permitAll()  // 회원가입, 로그인 관련 API, 공공 API는 인증 없이 접근 가능
+                ).permitAll()  // 로그인 관련 API, 공공 API는 인증 없이 접근 가능
                 .anyRequest().authenticated()  // 나머지 요청은 인증 필요
                 .and()
 //                .userDetailsService(customUserDetailsService)

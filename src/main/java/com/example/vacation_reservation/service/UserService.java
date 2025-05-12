@@ -10,6 +10,8 @@ import com.example.vacation_reservation.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.example.vacation_reservation.dto.user.UserResponseDto;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.regex.Pattern;
 
@@ -19,6 +21,30 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+
+    /**
+     * 사용자 정보를 조회하는 메서드.
+     *
+     * 사용자의 ID를 기반으로 User 객체를 조회하고, 해당 사용자 정보를 UserResponseDto로 반환
+     * User 객체의 position 필드는 fetch join을 통해 함께 로딩
+     *
+     * @param user 사용자 객체, 현재 로그인된 사용자 정보
+     * @return 조회된 사용자 정보를 담고 있는 UserResponseDto
+     * @throws CustomException 사용자가 존재하지 않는 경우 발생
+     */
+    @Transactional(readOnly = true)
+    public UserResponseDto getUserInfo(User user) {
+        User fetchedUser = userRepository.findByIdWithPosition(user.getId())
+                .orElseThrow(() -> new CustomException("사용자 정보를 찾을 수 없습니다."));
+
+        return new UserResponseDto(
+                fetchedUser.getEmployeeId(),
+                fetchedUser.getName(),
+                fetchedUser.getEmail(),
+                fetchedUser.getPosition().getName()
+        );
+    }
+
 
     /**
      * 비밀번호가 일치하는지 확인.
