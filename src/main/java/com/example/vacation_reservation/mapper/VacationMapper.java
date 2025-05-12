@@ -8,5 +8,6 @@ import java.util.List;
 
 @Mapper
 public interface VacationMapper {
-    List<VacationInfoDto> findVacationsByDepartmentId(@Param("departmentId") Long departmentId);
+    List<VacationInfoDto> findVacationsByDepartmentId(@Param("departmentId") Long departmentId, @Param("userId") Long userId);
+    List<VacationInfoDto> findAllVacations();
 }

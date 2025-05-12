@@ -33,8 +33,9 @@
         <!-- 휴가 종류 -->
         JOIN ojt_vacation_type vt ON vu.vacation_type_id = vt.id
 
-        <!-- 부서 ID가 일치하는 사용자만 필터링 -->
+        <!-- 부서 ID가 일치하는 사용자만, 본인 제외, 휴가가 승인 상태인 휴가만 필터링 -->
         WHERE u.department_id = #{departmentId}
+            AND u.id != #{userId}
+            AND v.status = 'APPROVED'
     </select>
-
 </mapper>

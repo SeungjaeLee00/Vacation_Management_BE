@@ -173,7 +173,7 @@ public class VacationService {
                 .getId();
 
         // MyBatis로 해당 부서 사람들의 휴가 목록 조회
-        List<VacationInfoDto> vacations = vacationMapper.findVacationsByDepartmentId(departmentId);
+        List<VacationInfoDto> vacations = vacationMapper.findVacationsByDepartmentId(departmentId, user.getId());
 
         // 부서 내에 휴가자가 없으면 빈 리스트
         if (vacations.isEmpty()) {
@@ -277,5 +277,4 @@ public class VacationService {
             }
         }
     }
-
 }
