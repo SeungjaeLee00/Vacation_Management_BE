@@ -12,11 +12,13 @@ public class UserResponseDto {
     private String name;
     private String email;
     private String positionName;
+    private String profileImageUrl;
 
-    public UserResponseDto(String employeeId, String name, String email, String positionName) {
+    public UserResponseDto(String employeeId, String name, String email, String positionName, String profileImageUrl) {
         this.employeeId = employeeId;
         this.name = name;
         this.email = email;
         this.positionName = positionName;
+        this.profileImageUrl = profileImageUrl;
     }
 }

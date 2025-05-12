@@ -52,6 +52,9 @@ public class User {
     @JoinColumn(name = "position_id")
     private Position position;
 
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     public User(String employeeId, String name, String email, String password, Role role, Position position) {
         this.employeeId = employeeId;
         this.name = name;

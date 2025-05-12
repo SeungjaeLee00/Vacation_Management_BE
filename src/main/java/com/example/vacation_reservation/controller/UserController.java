@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -102,4 +103,22 @@ public class UserController {
             return new ResponseEntity<>(new ApiResponse(false, "비밀번호 변경 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+
+    /**
+     * 프로필 이미지를 변경하는 메서드
+     *
+     * @param userDetails 현재 인증된 사용자의 세부 정보를 담고 있는 객체.
+     * @param image 업로드할 프로필 이미지 파일.
+     * @return 변경 완료 메시지를 담은 ResponseEntity.
+     */
+    @PostMapping("/change-profile-image")
+    public ResponseEntity<?> updateProfileImage(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("image") MultipartFile image) {
+
+        userService.updateProfileImage(userDetails.getUser(), image);
+        return ResponseEntity.ok("프로필 이미지가 변경되었습니다.");
+    }
+
 }
