@@ -17,6 +17,7 @@ import com.example.vacation_reservation.repository.vacation.VacationBalanceRepos
 import com.example.vacation_reservation.repository.vacation.VacationRepository;
 import com.example.vacation_reservation.repository.vacation.VacationTypeRepository;
 
+import com.example.vacation_reservation.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 public class VacationService {
 
     private final VacationBalanceService vacationBalanceService;
+    private final NotificationService notificationService;
 
     private final UserRepository userRepository;
     private final VacationRepository vacationRepository;
@@ -182,6 +184,7 @@ public class VacationService {
 
         return vacations;
     }
+
 
     /**
      * 사용자가 대기 중인 휴가를 취소할 수 있는 메서드

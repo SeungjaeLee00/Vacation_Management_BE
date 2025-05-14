@@ -120,5 +120,4 @@ public class UserController {
         userService.updateProfileImage(userDetails.getUser(), image);
         return ResponseEntity.ok("프로필 이미지가 변경되었습니다.");
     }
-
 }

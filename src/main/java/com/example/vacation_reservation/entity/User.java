@@ -52,7 +52,7 @@ public class User {
     @JoinColumn(name = "position_id")
     private Position position;
 
-    @Column(name = "profile_image_url")
+    @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
     public User(String employeeId, String name, String email, String password, Role role, Position position) {
