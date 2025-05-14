@@ -27,5 +27,8 @@ public class VacationRequestDto {
     @NotEmpty(message = "사용할 휴가 유형은 1개 이상 선택해야 합니다.")
     @Valid  // 내부 객체에 대한 validation 적용
     private List<VacationUsedDto> usedVacations;
+
+    @NotNull(message = "결재자는 반드시 지정해야 합니다.")
+    private String ApproverEmployeeId;
 }
 

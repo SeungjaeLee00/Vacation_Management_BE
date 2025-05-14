@@ -31,8 +31,8 @@ public class Vacation {
 
     // 관리자도 User 테이블 참조
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "approved_by")
-    private User approvedBy;
+    @JoinColumn(name = "approver_id")
+    private User approver;
 
     @Lob  // text 타입 매핑, varchar, 200자 내외
     @Column(nullable = false)

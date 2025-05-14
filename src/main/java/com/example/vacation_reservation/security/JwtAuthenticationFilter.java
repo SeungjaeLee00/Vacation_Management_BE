@@ -8,7 +8,7 @@
 
 package com.example.vacation_reservation.security;
 
-import com.example.vacation_reservation.service.CustomUserDetailsService;
+import com.example.vacation_reservation.service.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;

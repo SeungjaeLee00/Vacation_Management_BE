@@ -7,12 +7,11 @@ package com.example.vacation_reservation.controller;
 
 import com.example.vacation_reservation.dto.ApiResponse;
 import com.example.vacation_reservation.dto.auth.*;
-import com.example.vacation_reservation.dto.user.UserResponseDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.security.*;
 import com.example.vacation_reservation.service.AuthService;
-import com.example.vacation_reservation.service.UserService;
+import com.example.vacation_reservation.service.user.UserService;
 import com.example.vacation_reservation.service.email.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;

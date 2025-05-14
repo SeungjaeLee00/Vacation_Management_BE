@@ -2,7 +2,7 @@ package com.example.vacation_reservation.config;
 
 import com.example.vacation_reservation.security.JwtAuthenticationFilter;
 import com.example.vacation_reservation.security.JwtTokenProvider;
-import com.example.vacation_reservation.service.CustomUserDetailsService;
+import com.example.vacation_reservation.service.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,12 +1,13 @@
 /**
  * 사용자 관련 비즈니스 로직을 처리하는 서비스 클래스.
  */
-package com.example.vacation_reservation.service;
+package com.example.vacation_reservation.service.user;
 
 import com.example.vacation_reservation.dto.auth.ChangePasswordRequestDto;
 import com.example.vacation_reservation.entity.User;
 import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.repository.UserRepository;
+import com.example.vacation_reservation.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

@@ -83,6 +83,18 @@ public class VacationService {
             }
         }
 
+        // approver 유효성 검사 및 조회
+        User approver = userRepository.findByEmployeeId(dto.getApproverEmployeeId())
+                .orElseThrow(() -> new CustomException("지정된 결재자를 찾을 수 없습니다."));
+
+        if (approver.getPosition() == null || user.getPosition() == null) {
+            throw new CustomException("신청자 또는 결재자의 직급 정보가 없습니다.");
+        }
+
+        if (approver.getPosition().getLevel() <= user.getPosition().getLevel()) {
+            throw new CustomException("결재자는 신청자보다 직급이 높아야 합니다.");
+        }
+
         // 휴가 신청 정보 저장
         Vacation vacation = new Vacation(
                 user,
@@ -93,6 +105,7 @@ public class VacationService {
                 VacationStatus.PENDING
         );
 
+        vacation.setApprover(approver);
 
         // 사용 휴가 목록 구성
         List<VacationUsed> usedVacations = dto.getUsedVacations().stream().map(usedDto -> {

@@ -48,7 +48,8 @@ public class User {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    // 즉시 로딩됨.. 연관 엔티티가 많으면 좀.. 성능 문제가 있는데.. 하 대규모에서는 별론데
+    @ManyToOne(fetch = FetchType.EAGER)  // 사용자 조회가 jpa라서 lazy 발생함.. 그래서 일단 eager로 바꾸긴 했는데 사용자 조회를 mybatis로 바꾸는 걸 생각해야함..
     @JoinColumn(name = "position_id")
     private Position position;
 

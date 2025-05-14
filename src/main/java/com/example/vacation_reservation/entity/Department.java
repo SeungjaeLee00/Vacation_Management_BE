@@ -15,8 +15,4 @@ public class Department {
     private Long id;
 
     private String name; // 부서명
-
-    @OneToOne
-    @JoinColumn(name = "manager_id")
-    private User manager; // 이 부서의 관리자
 }
