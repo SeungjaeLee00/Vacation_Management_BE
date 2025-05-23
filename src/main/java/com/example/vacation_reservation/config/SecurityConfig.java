@@ -53,6 +53,7 @@ public class SecurityConfig {
                 .antMatchers(
                         "/api/auth/login",
                         "/api/auth/forgot-password",
+                        "/api/auth/refresh-token",
                         "/api/holidays/**"
                 ).permitAll()  // 로그인 관련 API, 공공 API는 인증 없이 접근 가능
                 .anyRequest().authenticated()  // 나머지 요청은 인증 필요

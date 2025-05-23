@@ -16,5 +16,5 @@ public class Position {
     private String name;
 
     @Column(nullable = false)
-    private int level;  // 숫자가 클수록 높은 직급 (예: 사원 1 < 대리 2 < 과장 3 < 부장 4)
+    private int level;  // 숫자가 낮을 수료ㅗㄱ 높은 직급 (신입사원 9 > .. > 대표이사 1)
 }

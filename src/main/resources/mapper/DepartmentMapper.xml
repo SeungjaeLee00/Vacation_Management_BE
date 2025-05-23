@@ -3,10 +3,9 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<!-- 부서 이름 찾기 XML-->
 <mapper namespace="com.example.vacation_reservation.mapper.DepartmentMapper">
-
     <select id="findAll" resultType="com.example.vacation_reservation.dto.department.DepartmentDto">
         SELECT id, name FROM ojt_department
     </select>
-
 </mapper>

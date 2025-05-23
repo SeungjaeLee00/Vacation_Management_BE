@@ -27,19 +27,8 @@ public class User {
     @Column(nullable = false, length = 255)
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Role role = Role.EMPLOYEE; // 기본값 설정
-
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
-    public enum Role {
-        EMPLOYEE, ADMIN
-    }
 
     @Column(name = "refresh_token", nullable = false, length = 512)
     private String refreshToken;
@@ -56,12 +45,15 @@ public class User {
     @Column(name = "profile_image_url", length = 500)
     private String profileImageUrl;
 
-    public User(String employeeId, String name, String email, String password, Role role, Position position) {
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+
+    public User(String employeeId, String name, String email, String password, Position position) {
         this.employeeId = employeeId;
         this.name = name;
         this.email = email;
         this.password = password;
-        this.role = role;
         this.position = position;
     }
 }

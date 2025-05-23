@@ -9,7 +9,6 @@ import com.example.vacation_reservation.exception.CustomException;
 import com.example.vacation_reservation.repository.UserRepository;
 import com.example.vacation_reservation.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -44,6 +43,11 @@ public class AuthService {
         User user = userRepository.findByEmployeeId(employeeId)
                 .orElseThrow(() -> new CustomException("아이디 또는 비밀번호가 일치하지 않습니다."));  // 사실은 사번이긴 함
 
+        // 계정 활성화 여부 체크
+        if (user.getIsActive() == null || !user.getIsActive()) {
+            throw new CustomException("계정이 비활성화 상태입니다. 관리자에게 문의하세요.");
+        }
+
         // 비밀번호 확인
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new CustomException("비밀번호가 올바르지 않습니다.");
@@ -74,22 +78,28 @@ public class AuthService {
      * @throws CustomException Refresh Token이 유효하지 않거나 만료된 경우
      */
     public String refreshAccessToken(String refreshToken) {
-        // Refresh Token 검증
+        // 토큰 유효성 검사
         if (!jwtTokenProvider.validateToken(refreshToken)) {
             throw new CustomException("리프레시 토큰이 유효하지 않거나 만료되었습니다.");
         }
 
-        // Refresh Token에서 사용자 정보 추출
-        String employeeId;
-        try {
-            employeeId = jwtTokenProvider.getEmployeeIdFromToken(refreshToken);
-        } catch (Exception e) {
-            throw new CustomException("토큰에서 사용자 정보를 추출할 수 없습니다.");
+        // 토큰에서 employeeId 추출
+        String employeeId = jwtTokenProvider.getEmployeeIdFromToken(refreshToken);
+
+        // 디비에서 사용자 조회
+        User user = userRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new CustomException("해당 사용자가 존재하지 않습니다."));
+
+        // 디비에서 저장되어 있는 토큰이랑 비교
+        String savedToken = user.getRefreshToken();
+        if (!refreshToken.equals(savedToken)) {
+            throw new CustomException("저장된 리프레시 토큰과 일치하지 않습니다.");
         }
 
-        // 새로운 Access Token 발급
+        // 새 accessToken 발급
         return jwtTokenProvider.generateAccessToken(employeeId);
     }
+
 
 
     /**

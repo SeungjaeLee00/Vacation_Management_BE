@@ -29,6 +29,6 @@ public class VacationRequestDto {
     private List<VacationUsedDto> usedVacations;
 
     @NotNull(message = "결재자는 반드시 지정해야 합니다.")
-    private String ApproverEmployeeId;
+    private String approverEmployeeId;
 }
 

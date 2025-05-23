@@ -29,7 +29,7 @@ public class Vacation {
     @OneToMany(mappedBy = "vacation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VacationUsed> usedVacations;
 
-    // 관리자도 User 테이블 참조
+    // 결재자도 User 테이블 참조
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approver_id")
     private User approver;

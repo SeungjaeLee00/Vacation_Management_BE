@@ -1,19 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<!--결재자 목록 조회 XML-->
 <mapper namespace="com.example.vacation_reservation.mapper.ApproverMapper">
-
-    <select id="findAvailableApprovers" parameterType="int" resultType="com.example.vacation_reservation.dto.approver.ApproverResponseDto">
+    <select id="findAvailableApprovers" parameterType="map" resultType="com.example.vacation_reservation.dto.approver.ApproverResponseDto">
         SELECT
-            u.name AS name,
-            u.email AS email,
-            p.name AS positionName,
-            p.level AS positionLevel,
-            d.name AS departmentName
+            u.name              AS name,
+            u.email             AS email,
+            u.employee_number   AS employeeId,
+            p.name              AS positionName,
+            p.level             AS positionLevel,
+            d.name              AS departmentName
         FROM ojt_user u
-        JOIN ojt_position p ON u.position_id = p.id
-        JOIN ojt_department d ON u.department_id = d.id
-        WHERE p.level > #{positionLevel}
+        JOIN ojt_position p     ON u.position_id = p.id
+        JOIN ojt_department d   ON u.department_id = d.id
+        WHERE u.is_active = 1
+            AND p.level > #{positionLevel}
         <if test="query != null and query != ''">
             AND u.name LIKE CONCAT('%', #{query}, '%')
         </if>

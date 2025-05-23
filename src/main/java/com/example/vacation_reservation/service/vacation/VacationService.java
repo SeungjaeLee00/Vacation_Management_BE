@@ -17,7 +17,6 @@ import com.example.vacation_reservation.repository.vacation.VacationBalanceRepos
 import com.example.vacation_reservation.repository.vacation.VacationRepository;
 import com.example.vacation_reservation.repository.vacation.VacationTypeRepository;
 
-import com.example.vacation_reservation.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,7 +31,6 @@ import java.util.stream.Collectors;
 public class VacationService {
 
     private final VacationBalanceService vacationBalanceService;
-    private final NotificationService notificationService;
 
     private final UserRepository userRepository;
     private final VacationRepository vacationRepository;
@@ -105,7 +103,7 @@ public class VacationService {
                 VacationStatus.PENDING
         );
 
-        vacation.setApprover(approver);
+        vacation.setApprover(approver);  // 결제자 세팅
 
         // 사용 휴가 목록 구성
         List<VacationUsed> usedVacations = dto.getUsedVacations().stream().map(usedDto -> {
@@ -242,25 +240,6 @@ public class VacationService {
             throw new CustomException("취소한 휴가만 삭제할 수 있습니다.");
         }
     }
-
-//    /**
-//     * 관리자가 REJECTED로 상태를 변경한 경우, 해당 휴가 일수 롤백
-//     */
-//    @Transactional
-//    public void rejectVacation(Long vacationId) {
-//        Vacation vacation = vacationRepository.findById(vacationId)
-//                .orElseThrow(() -> new CustomException("휴가 신청이 존재하지 않습니다."));
-//
-//        if (!vacation.getStatus().equals(VacationStatus.REJECTED)) {
-//            return; // 반려된 경우가 아니면 아무것도 하지 않음
-//        }
-//
-//        vacation.setStatus(VacationStatus.REJECTED);
-//        vacationRepository.save(vacation);
-//
-//        rollbackVacationBalance(vacation);
-//    }
-
 
     /**
      * 휴가가 취소되거나 반려된 경우, 해당 휴가의 사용된 일수를 롤백하여 휴가 잔여 일수를 복원하는 메서드

@@ -53,14 +53,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // 토큰에서 사번(employeeId) 추출
                 String employeeId = jwtTokenProvider.getEmployeeIdFromToken(token);
 
-                // 사번을 기반으로 사용자 정보 조회
+                // 사번 기반으로 사용자 정보 조회
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(employeeId);
 
-                // 권한을 빈 리스트로 설정하여 인증 객체 생성
+                // 권한을 빈 리스트로 설정 -> 인증 객체 생성
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userDetails, null, Collections.emptyList());  // 빈 리스트로 권한 설정
 
-                // 요청에 대한 추가 정보를 설정
+                // 요청에 대한 추가 정보 설정
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // SecurityContext에 인증 설정

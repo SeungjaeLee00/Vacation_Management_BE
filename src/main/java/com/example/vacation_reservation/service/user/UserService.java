@@ -198,42 +198,13 @@ public class UserService {
                 .orElseThrow(() -> new CustomException("사용자를 찾을 수 없습니다."));
     }
 
-
     /**
-     * 사용자 프로필 이미지 업데이트
-     *
-     * @param user 사용자 객체. 프로필 이미지를 업데이트할 대상 사용자.
-     * @param newImage 사용자가 업로드한 새로운 프로필 이미지 파일.
-     * @throws CustomException 이미지 업로드 중 발생한 오류를 처리하는 커스텀 예외.
+     * 프로필 변경
+     * @param user
+     * @param newImage
      */
     @Transactional
     public void updateProfileImage(User user, MultipartFile newImage) {
-        try {
-            // S3에 파일 업로드
-            String httpsUrl = s3Service.uploadFile(newImage);
-            String httpUrl = convertToHttpUrl(httpsUrl);
-
-            // DB에 이미지 URL 저장
-            user.setProfileImageUrl(httpUrl);
-            userRepository.save(user);
-
-        } catch (IOException e) {
-            throw new CustomException("이미지 업로드 중 오류가 발생했습니다: " + e.getMessage());
-        }
+        s3Service.updateProfileImage(user, newImage, userRepository);
     }
-
-
-    /**
-     * S3에서 반환된 HTTPS URL을 HTTP URL로 변환하는 메서드
-     *
-     * @param httpsUrl S3에서 반환된 HTTPS 형식의 URL.
-     * @return HTTP 형식으로 변환된 URL.
-     */
-    private String convertToHttpUrl(String httpsUrl) {
-        return httpsUrl.replace(
-                "https://2025ojt.leave-application.s3.ap-northeast-2.amazonaws.com",
-                "http://2025ojt.leave-application.s3-website.ap-northeast-2.amazonaws.com"
-        );
-    }
-
 }

@@ -22,6 +22,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -47,27 +48,32 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) {
         try {
-            // 로그인 서비스 호출
             Map<String, String> tokens = authService.login(loginRequest.getEmployeeId(), loginRequest.getPassword());
 
-            // 쿠키에 JWT 토큰 설정 (Access Token)
+            // Access Token 쿠키 설정 (유효기간 15분)
             Cookie accessTokenCookie = new Cookie("accessToken", tokens.get("accessToken"));
             accessTokenCookie.setHttpOnly(true);
-            accessTokenCookie.setSecure(true);    // HTTPS 환경에서만 쿠키 전송
+            accessTokenCookie.setSecure(true); // HTTPS 환경에서만 전송 (배포환경 기준)
             accessTokenCookie.setPath("/");
-            accessTokenCookie.setMaxAge(900);    // 쿠키의 유효기간 설정 (15분)
-
-            // 쿠키에 JWT 토큰 설정 (Refresh Token은 DB에 저장)
+            accessTokenCookie.setMaxAge(15 * 60); // 15분
             response.addCookie(accessTokenCookie);
 
+            // Refresh Token 쿠키 설정 (유효기간 4시간)
+            Cookie refreshTokenCookie = new Cookie("refreshToken", tokens.get("refreshToken"));
+            refreshTokenCookie.setHttpOnly(true);
+            refreshTokenCookie.setSecure(true);
+            refreshTokenCookie.setPath("/");
+            refreshTokenCookie.setMaxAge(4 * 60 * 60); // 4시간
+            response.addCookie(refreshTokenCookie);
+
             return ResponseEntity.ok(new ApiResponse(true, "로그인 성공"));
-        } catch (CustomException e) {  // 이건 사용자 정의 예외임 -> 사원번호를 잘못입력한 뭐 그런
-            // 그냥 예외 던져서 GlobalExceptionHandler로 전달
+        } catch (CustomException e) {
             throw e;
-        } catch (Exception e) {  // 이건 일반 예외임 -> 데이터베이스 연결 오류 같은거
+        } catch (Exception e) {
             return new ResponseEntity<>(new ApiResponse(false, "로그인 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
     /**
      * 로그아웃 요청 처리
@@ -94,7 +100,17 @@ public class AuthController {
                     .maxAge(0)
                     .build();
 
+            // Refresh Token 쿠키 삭제
+            ResponseCookie deleteRefreshToken = ResponseCookie.from("refreshToken", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .sameSite("Strict")
+                    .path("/")
+                    .maxAge(0)
+                    .build();
+
             response.addHeader(HttpHeaders.SET_COOKIE, deleteAccessToken.toString());
+            response.addHeader(HttpHeaders.SET_COOKIE, deleteRefreshToken.toString());
 
             return ResponseEntity.ok(new ApiResponse(true, "로그아웃 성공"));
         } catch (Exception e) {
@@ -226,22 +242,45 @@ public class AuthController {
      * 리프레시 토큰을 사용하여 새로운 액세스 토큰을 발급하는 API
      */
     @PostMapping("/refresh-token")
-    public ResponseEntity<?> refreshAccessToken(@RequestBody Map<String, String> refreshTokenRequest) {
-        String refreshToken = refreshTokenRequest.get("refreshToken");
+    public ResponseEntity<?> refreshAccessToken(HttpServletRequest request, HttpServletResponse response) {
         try {
+            // 쿠키에서 refreshToken 추출
+            String refreshToken = null;
+            if (request.getCookies() != null) {
+                for (Cookie cookie : request.getCookies()) {
+                    if ("refreshToken".equals(cookie.getName())) {
+                        refreshToken = cookie.getValue();
+                        break;
+                    }
+                }
+            }
+
             if (refreshToken == null || refreshToken.isEmpty()) {
                 throw new CustomException("리프레시 토큰이 필요합니다.");
             }
-            String newAccessToken = authService.refreshAccessToken(refreshToken);
-            Map<String, String> responseMap = new HashMap<>();
-            responseMap.put("accessToken", newAccessToken);
 
-            return ResponseEntity.ok(responseMap);
+            // AuthService를 통해 새 Access Token 발급
+            String newAccessToken = authService.refreshAccessToken(refreshToken);
+
+            // 새 Access Token을 쿠키에 담아서 응답 (HttpOnly, Secure 옵션 필수)
+            Cookie accessTokenCookie = new Cookie("accessToken", newAccessToken);
+            accessTokenCookie.setHttpOnly(true);
+            accessTokenCookie.setSecure(true);
+            accessTokenCookie.setPath("/");
+            accessTokenCookie.setMaxAge(15 * 60); // 15분 유지, 필요에 따라 조절
+            response.addCookie(accessTokenCookie);
+
+            // 성공 응답 반환
+            return ResponseEntity.ok(new ApiResponse(true, "Access Token 재발급 성공"));
+
         } catch (CustomException e) {
-            throw e;
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ApiResponse(false, e.getMessage()));
         } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(false, "리프레시 토큰 처리 실패: " + e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse(false, "리프레시 토큰 처리 실패: " + e.getMessage()));
         }
     }
+
 }
 

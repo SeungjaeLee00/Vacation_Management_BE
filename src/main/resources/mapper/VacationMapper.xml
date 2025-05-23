@@ -1,37 +1,35 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!-- 내 부서 사람들의 휴가를 조회 -->
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
+<!-- 내 부서 사람들 휴가 조회 XML-->
 <mapper namespace="com.example.vacation_reservation.mapper.VacationMapper">
-
-    <!-- 내 부서 사람들의 휴가 정보 조회 -->
-    <!-- 반환값을 VacationInfoDto로 매핑  -->
+    <!-- 반환값 VacationInfoDto로 매핑  -->
     <select id="findVacationsByDepartmentId" resultType="com.example.vacation_reservation.dto.vacation.VacationInfoDto">
         SELECT
-        v.id AS vacationId,
-        u.name AS userName,
-        p.name AS positionName,
-        vt.name AS vacationType,
-        v.start_at,
-        v.end_at
+        v.id            AS vacationId,
+        u.name          AS userName,
+        p.name          AS positionName,
+        vt.name         AS vacationType,
+        v.start_at      AS start_at,
+        v.end_at        AS end_at
         FROM ojt_vacation v
 
         <!-- 휴가 신청한 사용자 -->
-        JOIN ojt_user u ON v.user_id = u.id
+        JOIN ojt_user u             ON v.user_id = u.id
 
         <!-- 사용자 부서 -->
-        JOIN ojt_department d ON u.department_id = d.id
+        JOIN ojt_department d       ON u.department_id = d.id
 
         <!-- 사용자 직급 -->
-        JOIN ojt_position p ON u.position_id = p.id
+        JOIN ojt_position p         ON u.position_id = p.id
 
         <!-- 휴가 아이디 -->
-        JOIN ojt_vacation_used vu ON vu.vacation_id = v.id
+        JOIN ojt_vacation_used vu   ON vu.vacation_id = v.id
 
         <!-- 휴가 종류 -->
-        JOIN ojt_vacation_type vt ON vu.vacation_type_id = vt.id
+        JOIN ojt_vacation_type vt   ON vu.vacation_type_id = vt.id
 
         <!-- 부서 ID가 일치하는 사용자만, 본인 제외, 휴가가 승인 상태인 휴가만 필터링 -->
         WHERE u.department_id = #{departmentId}

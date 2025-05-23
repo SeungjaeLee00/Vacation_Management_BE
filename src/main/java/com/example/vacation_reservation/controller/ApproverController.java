@@ -31,8 +31,6 @@ public class ApproverController {
             throw new CustomException("인증된 사용자가 아닙니다.");
         }
 
-//        System.out.println("검색어: " + query);
-
         User currentUser = userDetails.getUser();
         List<ApproverResponseDto> approvers = approverService.findAvailableApprovers(currentUser, query);
 

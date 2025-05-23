@@ -15,7 +15,6 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-//    private static final long VALIDITY_IN_MS = 14400 * 1000; // 4시간
     private static final long ACCESS_TOKEN_VALIDITY_MS = 15 * 60 * 1000; // 15분
     private static final long REFRESH_TOKEN_VALIDITY_MS = 4 * 60 * 60 * 1000; // 4시간
 
